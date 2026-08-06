@@ -283,11 +283,20 @@ export function evaluateInventory(
 }
 
 export function getReadiness(
-  activity: Activity,
+  activity: Activity | undefined,
   inventory: InventoryState[],
   latestScan: Scan | undefined,
   sensorStatus: SensorStatus,
+  options: { now?: string; config?: InventoryConfig } = {},
 ): Readiness {
+  if (!activity) {
+    return {
+      state: 'scan-required',
+      label: 'Activity required',
+      detail: 'Choose a commitment before Carry can evaluate what belongs in the bag.',
+    }
+  }
+
   if (sensorStatus === 'disconnected' || latestScan?.status === 'failed') {
     return {
       state: 'sensor-unavailable',
@@ -304,9 +313,28 @@ export function getReadiness(
     }
   }
 
+  const config = options.config ?? DEFAULT_CONFIG
+  const now = options.now
+  const completedAt = latestScan.completedAt ?? latestScan.startedAt
+  if (now && new Date(now).getTime() - new Date(completedAt).getTime() > config.observationStaleMinutes * 60_000) {
+    return {
+      state: 'scan-required',
+      label: 'Fresh scan required',
+      detail: 'The last closed-bag snapshot is stale; scan again before trusting readiness.',
+    }
+  }
+
   const requiredStates = activity.requiredItemIds
     .map((itemId) => inventory.find((state) => state.itemId === itemId))
     .filter((state): state is InventoryState => state !== undefined)
+
+  if (requiredStates.length !== activity.requiredItemIds.length) {
+    return {
+      state: 'scan-required',
+      label: 'Scan required',
+      detail: 'Carry does not have an inventory state for every required item yet.',
+    }
+  }
 
   if (requiredStates.some((state) => state.status === 'not-detected')) {
     const missingCount = requiredStates.filter((state) => state.status === 'not-detected').length
@@ -352,15 +380,20 @@ export function evaluateAlerts(
   inventory: InventoryState[],
   scans: Scan[],
   existingAlerts: Alert[],
-  options: { now: string; config?: InventoryConfig },
+  options: {
+    now: string
+    config?: InventoryConfig
+    travelEstimate?: TravelEstimate
+    idGenerator?: (input: { activityId: string; itemId: string; type: AlertType; scanId: string; revision: number }) => string
+  },
 ): Alert[] {
   const config = options.config ?? DEFAULT_CONFIG
   const latestScan = getLatestScan(scans)
-  const leaveBy = calculateLeaveBy(activity.startTime, activity.travelMinutes, activity.departureBufferMinutes)
+  const leaveBy = options.travelEstimate?.leaveBy
   const nowMs = new Date(options.now).getTime()
-  const leaveByMs = new Date(leaveBy).getTime()
   const startMs = new Date(activity.startTime).getTime()
-  const withinAlertWindow = nowMs >= leaveByMs - config.alertLeadMinutes * 60_000 && nowMs < startMs
+  const leaveByMs = leaveBy ? new Date(leaveBy).getTime() : Number.NaN
+  const withinAlertWindow = Number.isFinite(leaveByMs) && nowMs >= leaveByMs - config.alertLeadMinutes * 60_000 && nowMs < startMs
   const validRecentScan =
     latestScan?.status === 'completed' &&
     latestScan.bagState === 'closed' &&
@@ -377,6 +410,14 @@ export function evaluateAlerts(
     if (!state) continue
     const alertType = alertTypeForState(state)
     const matching = alerts.filter((alert) => alert.activityId === activity.id && alert.itemId === item.id)
+    const unresolved = matching.filter((alert) => ['active', 'acknowledged', 'suppressed'].includes(alert.status))
+
+    if (unresolved.length > 1) {
+      const keepId = unresolved[unresolved.length - 1].id
+      alerts = alerts.map((alert) => unresolved.some((candidate) => candidate.id === alert.id) && alert.id !== keepId
+        ? { ...alert, status: 'expired', resolvedAt: alert.resolvedAt ?? options.now }
+        : alert)
+    }
 
     if (state.status === 'confirmed-present') {
       alerts = alerts.map((alert) =>
@@ -387,12 +428,17 @@ export function evaluateAlerts(
       continue
     }
 
-    if (!withinAlertWindow || !validRecentScan || !alertType) continue
+    if (!withinAlertWindow || !validRecentScan || !alertType || !leaveBy) continue
 
-    const openDuplicate = matching.find((alert) =>
-      alert.type === alertType && ['active', 'acknowledged', 'suppressed'].includes(alert.status),
-    )
-    if (openDuplicate) continue
+    const openDuplicate = unresolved[unresolved.length - 1]
+    const duplicateAge = openDuplicate ? nowMs - new Date(openDuplicate.createdAt).getTime() : Number.POSITIVE_INFINITY
+    if (openDuplicate && openDuplicate.type === alertType && duplicateAge <= config.alertDeduplicationMinutes * 60_000) continue
+
+    if (openDuplicate) {
+      alerts = alerts.map((alert) =>
+        alert.id === openDuplicate.id ? { ...alert, status: 'expired', resolvedAt: options.now } : alert,
+      )
+    }
 
     const readsEvaluated = latestScan.readsEvaluated ?? 0
     const evidence: AlertEvidence = {
@@ -414,8 +460,9 @@ export function evaluateAlerts(
           ? `Open the bag, add ${item.name.toLowerCase()}, and scan again.`
           : `Open the bag and rescan ${item.name.toLowerCase()} before leaving.`,
     }
+    const revision = matching.length + 1
     alerts.push({
-      id: `${activity.id}-${item.id}-${alertType}-${Date.now()}`,
+      id: options.idGenerator?.({ activityId: activity.id, itemId: item.id, type: alertType, scanId: latestScan.id, revision }) ?? `alert:${activity.id}:${item.id}:${alertType}:${latestScan.id}:${revision}`,
       activityId: activity.id,
       itemId: item.id,
       type: alertType,

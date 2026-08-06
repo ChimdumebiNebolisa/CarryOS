@@ -13,8 +13,13 @@ import {
 } from './domain'
 import { ACTIVITIES, ITEMS } from './demoData'
 import { SimulatedRFIDReader } from './simulator'
+import { SimulatedTravelTimeProvider } from './travel'
 
 const config: InventoryConfig = { ...DEFAULT_CONFIG, observationStaleMinutes: 30 }
+
+async function demoTravelEstimate() {
+  return new SimulatedTravelTimeProvider(18, 7).getTravelEstimate({ name: 'Backpack' }, ACTIVITIES[0].destination, DEMO_NOW)
+}
 
 function makeScan(overrides: Partial<Scan> = {}): Scan {
   return {
@@ -104,6 +109,24 @@ describe('Carry inventory state engine', () => {
     expect(states.every((state) => state.status === 'unknown')).toBe(true)
     expect(readiness.state).toBe('sensor-unavailable')
   })
+
+  it('requires a fresh scan when the latest closed-bag snapshot is stale', () => {
+    const staleScan = makeScan({ completedAt: '2026-08-05T07:00:00-05:00' })
+    const states = evaluateInventory(ITEMS.slice(0, 4), [staleScan], [makeObservation('laptop')], { now: DEMO_NOW, bagState: 'scan-complete', config })
+    const readiness = getReadiness(ACTIVITIES[0], states, staleScan, 'connected', { now: DEMO_NOW, config })
+
+    expect(readiness.state).toBe('scan-required')
+    expect(readiness.label).toBe('Fresh scan required')
+  })
+
+  it('requires a scan when a required item has no inventory state', () => {
+    const scan = makeScan()
+    const states = evaluateInventory(ITEMS.slice(0, 2), [scan], [makeObservation('laptop')], { now: DEMO_NOW, bagState: 'scan-complete', config })
+    const readiness = getReadiness(ACTIVITIES[0], states, scan, 'connected', { now: DEMO_NOW, config })
+
+    expect(readiness.state).toBe('scan-required')
+    expect(readiness.detail).toContain('every required item')
+  })
 })
 
 describe('Carry timing and alert policy', () => {
@@ -111,15 +134,16 @@ describe('Carry timing and alert policy', () => {
     expect(formatTime(calculateLeaveBy(ACTIVITIES[0].startTime, 18, 7))).toBe('8:35 AM')
   })
 
-  it('creates one missing-item alert and deduplicates repeated evaluation', () => {
+  it('creates one missing-item alert and deduplicates repeated evaluation', async () => {
     const inventory = evaluateInventory(
       ITEMS,
       [makeScan()],
       [makeObservation('laptop'), makeObservation('notebook'), makeObservation('student-id')],
       { now: DEMO_NOW, bagState: 'scan-complete', config },
     )
-    const first = evaluateAlerts(ACTIVITIES[0], ITEMS, inventory, [makeScan()], [], { now: DEMO_NOW, config })
-    const second = evaluateAlerts(ACTIVITIES[0], ITEMS, inventory, [makeScan()], first, { now: DEMO_NOW, config })
+    const travelEstimate = await demoTravelEstimate()
+    const first = evaluateAlerts(ACTIVITIES[0], ITEMS, inventory, [makeScan()], [], { now: DEMO_NOW, config, travelEstimate })
+    const second = evaluateAlerts(ACTIVITIES[0], ITEMS, inventory, [makeScan()], first, { now: DEMO_NOW, config, travelEstimate })
 
     expect(first).toHaveLength(1)
     expect(first[0].type).toBe('missing-item')
@@ -127,24 +151,56 @@ describe('Carry timing and alert policy', () => {
     expect(second).toHaveLength(1)
   })
 
-  it('resolves the alert after the missing item is confirmed', () => {
+  it('resolves the alert after the missing item is confirmed', async () => {
     const missingInventory = evaluateInventory(
       ITEMS,
       [makeScan()],
       [makeObservation('laptop'), makeObservation('notebook'), makeObservation('student-id')],
       { now: DEMO_NOW, bagState: 'scan-complete', config },
     )
-    const alert = evaluateAlerts(ACTIVITIES[0], ITEMS, missingInventory, [makeScan()], [], { now: DEMO_NOW, config })
+    const travelEstimate = await demoTravelEstimate()
+    const alert = evaluateAlerts(ACTIVITIES[0], ITEMS, missingInventory, [makeScan()], [], { now: DEMO_NOW, config, travelEstimate })
     const resolvedInventory = evaluateInventory(
       ITEMS,
       [makeScan()],
       [makeObservation('laptop'), makeObservation('notebook'), makeObservation('calculator'), makeObservation('student-id')],
       { now: DEMO_NOW, bagState: 'scan-complete', config },
     )
-    const resolved = evaluateAlerts(ACTIVITIES[0], ITEMS, resolvedInventory, [makeScan()], alert, { now: DEMO_NOW, config })
+    const resolved = evaluateAlerts(ACTIVITIES[0], ITEMS, resolvedInventory, [makeScan()], alert, { now: DEMO_NOW, config, travelEstimate })
 
     expect(resolved[0].status).toBe('resolved')
     expect(resolved[0].resolvedAt).toBe(DEMO_NOW)
+  })
+
+  it('supersedes a changed condition without leaving two unresolved alerts', async () => {
+    const travelEstimate = await demoTravelEstimate()
+    const probableInventory = evaluateInventory(ITEMS, [makeScan()], [makeObservation('laptop'), makeObservation('notebook'), makeObservation('student-id'), makeObservation('calculator', { consecutiveReads: 2, signalStrength: -72, confidenceContribution: 0.4 })], { now: DEMO_NOW, bagState: 'scan-complete', config })
+    const first = evaluateAlerts(ACTIVITIES[0], ITEMS, probableInventory, [makeScan()], [], { now: DEMO_NOW, config, travelEstimate })
+    const secondScan = makeScan({ id: 'scan-2' })
+    const missingInventory = evaluateInventory(ITEMS, [secondScan], [makeObservation('laptop', { scanId: 'scan-2' }), makeObservation('notebook', { scanId: 'scan-2' }), makeObservation('student-id', { scanId: 'scan-2' })], { now: DEMO_NOW, bagState: 'scan-complete', config })
+    const second = evaluateAlerts(ACTIVITIES[0], ITEMS, missingInventory, [secondScan], first, { now: DEMO_NOW, config, travelEstimate })
+
+    expect(second.filter((alert) => ['active', 'acknowledged', 'suppressed'].includes(alert.status))).toHaveLength(1)
+    expect(second.filter((alert) => alert.status === 'expired')).toHaveLength(1)
+    expect(second.find((alert) => alert.status === 'active')?.type).toBe('missing-item')
+  })
+
+  it('cleans up legacy duplicate unresolved alerts for the same item', async () => {
+    const travelEstimate = await demoTravelEstimate()
+    const inventory = evaluateInventory(ITEMS, [makeScan()], [makeObservation('laptop'), makeObservation('notebook'), makeObservation('student-id')], { now: DEMO_NOW, bagState: 'scan-complete', config })
+    const first = evaluateAlerts(ACTIVITIES[0], ITEMS, inventory, [makeScan()], [], { now: DEMO_NOW, config, travelEstimate })
+    const duplicate = { ...first[0], id: 'legacy-duplicate-alert' }
+    const cleaned = evaluateAlerts(ACTIVITIES[0], ITEMS, inventory, [makeScan()], [first[0], duplicate], { now: DEMO_NOW, config, travelEstimate })
+
+    expect(cleaned.filter((alert) => ['active', 'acknowledged', 'suppressed'].includes(alert.status))).toHaveLength(1)
+    expect(cleaned.filter((alert) => alert.status === 'expired')).toHaveLength(1)
+  })
+
+  it('does not invent an alert leave-by when the travel provider has no estimate', () => {
+    const inventory = evaluateInventory(ITEMS, [makeScan()], [makeObservation('laptop'), makeObservation('notebook'), makeObservation('student-id')], { now: DEMO_NOW, bagState: 'scan-complete', config })
+    const alerts = evaluateAlerts(ACTIVITIES[0], ITEMS, inventory, [makeScan()], [], { now: DEMO_NOW, config })
+
+    expect(alerts).toHaveLength(0)
   })
 })
 
