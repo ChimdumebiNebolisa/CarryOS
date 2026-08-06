@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#F5F4EF"/>
+  <circle cx="1030" cy="84" r="260" fill="#E5F0E7"/>
+  <circle cx="1080" cy="550" r="220" fill="#F4EAD5"/>
+  <path d="M0 488C194 434 305 498 456 469C623 437 747 351 1200 420V630H0V488Z" fill="#E9EFEA"/>
+  <rect x="72" y="72" width="52" height="52" rx="16" fill="#294E39"/>
+  <text x="98" y="108" fill="#F5F4EF" font-family="Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle">C</text>
+  <text x="145" y="106" fill="#20251F" font-family="Arial, sans-serif" font-size="27" font-weight="700">Carry</text>
+  <text x="75" y="243" fill="#294E39" font-family="Arial, sans-serif" font-size="20" letter-spacing="4">CONTEXT-AWARE BACKPACK INTELLIGENCE</text>
+  <text x="72" y="336" fill="#20251F" font-family="Arial, sans-serif" font-size="84" font-weight="700" letter-spacing="-4">Carry less</text>
+  <text x="72" y="420" fill="#357A4D" font-family="Arial, sans-serif" font-size="84" font-weight="700" letter-spacing="-4">uncertainty.</text>
+  <rect x="845" y="170" width="255" height="298" rx="25" fill="#FBFAF6" stroke="#D8E2D9" stroke-width="3" transform="rotate(4 845 170)"/>
+  <circle cx="905" cy="240" r="29" fill="#E5F0E7"/>
+  <path d="M895 231C895 221 915 221 915 231V254H895V231Z" fill="#357A4D"/>
+  <text x="900" y="318" fill="#7D877C" font-family="Arial, sans-serif" font-size="12" letter-spacing="2">CURRENT CARRY</text>
+  <text x="900" y="355" fill="#20251F" font-family="Arial, sans-serif" font-size="25" font-weight="700">Calculus II</text>
+  <text x="900" y="381" fill="#7D877C" font-family="Arial, sans-serif" font-size="13">Science Building · 9 AM</text>
+  <rect x="900" y="415" width="135" height="29" rx="14" fill="#E5F0E7"/>
+  <text x="967" y="435" fill="#357A4D" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">3 / 4 confirmed</text>
+</svg>
