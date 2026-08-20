@@ -100,7 +100,7 @@ export function CarryStateStack() {
               setIndex(idIndex)
               setAutoplayDone(true)
             }}
-            className={`rounded-full px-3 py-2 text-xs ${id === currentId ? 'bg-[var(--paper)] text-[var(--ink)]' : 'bg-white/8 text-[var(--paper)]'}`}
+            className={`min-h-11 rounded-full px-3 py-2 text-xs ${id === currentId ? 'bg-[var(--paper)] text-[var(--ink)]' : 'bg-white/8 text-[var(--paper)]'}`}
             aria-pressed={id === currentId}
           >
             {snapshots[id].title}
