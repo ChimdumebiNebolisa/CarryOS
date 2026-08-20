@@ -14,5 +14,10 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] }, testIgnore: /browser-smoke\.spec\.ts/ },
+    { name: 'chromium-smoke', use: { ...devices['Desktop Chrome'] }, testMatch: /browser-smoke\.spec\.ts/ },
+    { name: 'firefox-smoke', use: { ...devices['Desktop Firefox'] }, testMatch: /browser-smoke\.spec\.ts/ },
+    { name: 'webkit-smoke', use: { ...devices['Desktop Safari'] }, testMatch: /browser-smoke\.spec\.ts/ },
+  ],
 })

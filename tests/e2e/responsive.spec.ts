@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test('no horizontal overflow at required widths', async ({ page }) => {
-  for (const width of [1440, 768, 390, 320]) {
+  for (const width of [1440, 1280, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 900 })
     await page.goto('/')
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1)
