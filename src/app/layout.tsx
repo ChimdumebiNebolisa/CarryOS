@@ -20,8 +20,8 @@ const mono = DM_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'CarryOS: Backpack intelligence, made inspectable',
-  description: 'Carry compares the day ahead with what your bag actually contains.',
+  title: 'CarryOS — Know before you go.',
+  description: 'CarryOS knows what you’ll need today, checks what’s in your bag, and tells you what’s missing before you leave.',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {

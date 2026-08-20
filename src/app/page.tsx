@@ -1,31 +1,22 @@
-import { AiBoundary } from '@/components/marketing/AiBoundary'
-import { ArchitectureSection } from '@/components/marketing/ArchitectureSection'
-import { ContextRequirements } from '@/components/marketing/ContextRequirements'
-import { EvidenceSection } from '@/components/marketing/EvidenceSection'
+import { buildLandingScenario } from '@/application/landing-scenario'
+import { DayChangesSection } from '@/components/marketing/DayChangesSection'
 import { FinalCta } from '@/components/marketing/FinalCta'
-import { Footer } from '@/components/marketing/Footer'
-import { FutureScenarios } from '@/components/marketing/FutureScenarios'
 import { Hero } from '@/components/marketing/Hero'
-import { LimitationsSection } from '@/components/marketing/LimitationsSection'
-import { ReconciliationSection } from '@/components/marketing/ReconciliationSection'
-import { SensingSection } from '@/components/marketing/SensingSection'
-import { WorkingProof } from '@/components/marketing/WorkingProof'
+import { HowItWorksSection } from '@/components/marketing/HowItWorksSection'
+import { LandingNav } from '@/components/marketing/LandingNav'
+import { MissingBeforeLeaveSection } from '@/components/marketing/MissingBeforeLeaveSection'
 
 export default function HomePage() {
+  const scenario = buildLandingScenario()
+
   return (
     <main className="landing-page">
+      <LandingNav />
       <Hero />
-      <ContextRequirements />
-      <WorkingProof />
-      <SensingSection />
-      <ReconciliationSection />
-      <EvidenceSection />
-      <AiBoundary />
-      <FutureScenarios />
-      <ArchitectureSection />
-      <LimitationsSection />
+      <HowItWorksSection scenario={scenario} />
+      <DayChangesSection scenario={scenario} />
+      <MissingBeforeLeaveSection scenario={scenario} />
       <FinalCta />
-      <Footer />
     </main>
   )
 }

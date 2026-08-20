@@ -4,6 +4,10 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { buildLandingProof } from '@/application/landing-proof'
 
+/**
+ * Legacy test fixture for the pre-v2 hero state contract. It is intentionally
+ * not part of the landing system and must not be reused for new marketing UI.
+ */
 export function CarryStateStack() {
   const rootRef = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState(false)

@@ -8,7 +8,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-[var(--confirm)] text-[var(--paper)] hover:bg-[var(--confirm-strong)]',
+        primary: 'bg-[var(--primary-action)] text-[var(--paper)] hover:bg-[var(--primary-action-hover)]',
         ghost: 'bg-transparent text-current hover:bg-white/8',
         paper: 'bg-[var(--ink)] text-[var(--paper)] hover:bg-[var(--ink-soft)]',
         warning: 'bg-[var(--caution)] text-[var(--ink)] hover:bg-[var(--caution-strong)]',
