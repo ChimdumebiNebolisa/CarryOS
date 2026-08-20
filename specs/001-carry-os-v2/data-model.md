@@ -16,10 +16,10 @@ All domain types live in `src/domain/types.ts`. Pure functions consume injected 
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | string | calculus-ii, exam-lab, internship-shift |
+| id | string | algorithms, exam-lab, internship-shift |
 | name | string | |
 | type | class \| exam-lab \| internship | |
-| startTime | ISO string | Demo Calculus II: 2026-08-05T09:00:00-05:00 |
+| startTime | ISO string | Demo Algorithms: 2026-08-05T10:00:00-05:00 |
 | destination.name | string | |
 | destination.description | string? | |
 | travelMinutes | number? | Absent means timing unavailable |

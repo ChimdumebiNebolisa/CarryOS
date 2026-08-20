@@ -2,7 +2,7 @@
 
 import * as Dialog from '@radix-ui/react-dialog'
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   acknowledge,
   applySuggestionDecision,
@@ -17,8 +17,10 @@ import {
   setItemPresent,
   setItemQuality,
   setSuggestions,
+  suppress,
   type DemoSession,
 } from '@/application/demo-scenario'
+import { isAlertActionable, isAlertCountable, isAlertVisible } from '@/domain/alerts'
 import { ITEM_STATE_LABELS, type CarryProfileResult } from '@/domain/types'
 import { Button } from '@/components/ui/button'
 import { formatClock } from '@/lib/utils'
@@ -28,28 +30,53 @@ export function DemoWorkspace() {
   const [selectedAlert, setSelectedAlert] = useState<string | null>(null)
   const [aiStatus, setAiStatus] = useState('')
   const [aiBusy, setAiBusy] = useState(false)
-  const alert = session.alerts.find((item) => item.id === selectedAlert) ?? session.alerts[0]
+  const alert = session.alerts.find((item) => item.id === selectedAlert)
+  const requestGeneration = useRef(0)
+  const requestController = useRef<AbortController | null>(null)
+  const lastAlertTrigger = useRef<HTMLButtonElement | null>(null)
+
+  useEffect(() => () => requestController.current?.abort(), [])
+
+  function openAlert(alertId: string, trigger: HTMLButtonElement) {
+    lastAlertTrigger.current = trigger
+    setSelectedAlert(alertId)
+  }
+
+  function resetWorkspace() {
+    requestGeneration.current += 1
+    requestController.current?.abort()
+    requestController.current = null
+    setSession(resetDemo())
+    setSelectedAlert(null)
+    setAiStatus('')
+    setAiBusy(false)
+  }
   function update(updater: (current: DemoSession) => DemoSession) {
     setSession((current) => {
       const next = updater(current)
-      if (
-        typeof Notification !== 'undefined' &&
-        next.browserPermission === 'granted' &&
-        next.notifications[0] &&
-        next.notifications[0].id !== current.notifications[0]?.id
-      ) {
-        new Notification(next.notifications[0].title, { body: next.notifications[0].body })
+      if (typeof Notification !== 'undefined' && next.browserPermission === 'granted') {
+        const existingNotificationIds = new Set(current.notifications.map((notification) => notification.id))
+        for (const notification of next.notifications) {
+          if (!existingNotificationIds.has(notification.id)) {
+            new Notification(notification.title, { body: notification.body })
+          }
+        }
       }
       return next
     })
   }
 
   async function requestProfile() {
+    const generation = requestGeneration.current + 1
+    requestGeneration.current = generation
+    const controller = new AbortController()
+    requestController.current = controller
     setAiBusy(true)
     setAiStatus('Generating suggestions...')
     try {
       const response = await fetch('/api/carry-profile', {
         method: 'POST',
+        signal: controller.signal,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event: {
@@ -67,6 +94,7 @@ export function DemoWorkspace() {
         }),
       })
       const body = (await response.json()) as CarryProfileResult | { error: string }
+      if (requestGeneration.current !== generation) return
       if (!response.ok || !('source' in body)) {
         setAiStatus('error' in body ? body.error : 'Suggestions are unavailable. Try again.')
         return
@@ -74,9 +102,13 @@ export function DemoWorkspace() {
       setSession((current) => setSuggestions(current, body, body.source === 'fallback' ? 'Deterministic fallback' : 'Validated model output'))
       setAiStatus(body.source === 'fallback' ? 'Deterministic fallback' : 'Model suggestions ready. Approve before they change requirements.')
     } catch {
+      if (controller.signal.aborted || requestGeneration.current !== generation) return
       setAiStatus('Suggestions are unavailable. Try again.')
     } finally {
-      setAiBusy(false)
+      if (requestGeneration.current === generation) {
+        requestController.current = null
+        setAiBusy(false)
+      }
     }
   }
 
@@ -88,7 +120,7 @@ export function DemoWorkspace() {
             CarryOS
           </Link>
           <div className="flex gap-2">
-            <Button type="button" data-testid="reset-demo" variant="ghost" onClick={() => setSession(resetDemo())}>
+            <Button type="button" data-testid="reset-demo" variant="ghost" onClick={resetWorkspace}>
               Reset demo
             </Button>
             <Button asChild variant="paper">
@@ -106,8 +138,9 @@ export function DemoWorkspace() {
         />
         <AlertPanel
           session={session}
-          onOpen={(id) => setSelectedAlert(id)}
+          onOpen={openAlert}
           onAck={(id) => setSession((current) => acknowledge(current, id))}
+          onSnooze={(id) => setSession((current) => suppress(current, id))}
         />
         <CarryProfilePanel
           session={session}
@@ -123,11 +156,19 @@ export function DemoWorkspace() {
       <Dialog.Root open={Boolean(selectedAlert && alert)} onOpenChange={(open) => !open && setSelectedAlert(null)}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50" />
-          <Dialog.Content className="fixed inset-y-0 right-0 w-full max-w-md overflow-y-auto bg-[var(--paper-strong)] p-6 shadow-2xl focus-visible:ring-2 focus-visible:ring-[var(--ink)] focus-visible:ring-offset-2">
+          <Dialog.Content
+            className="fixed inset-y-0 right-0 w-full max-w-md overflow-y-auto bg-[var(--paper-strong)] p-6 shadow-2xl focus-visible:ring-2 focus-visible:ring-[var(--ink)] focus-visible:ring-offset-2"
+            onCloseAutoFocus={(event) => {
+              event.preventDefault()
+              lastAlertTrigger.current?.focus()
+            }}
+          >
             <Dialog.Title className="text-2xl">Alert evidence</Dialog.Title>
             {alert ? (
               <div className="mt-4 space-y-3 text-sm">
-                <p data-testid="alert-summary">{alert.evidence.summary}</p>
+                <Dialog.Description asChild>
+                  <p data-testid="alert-summary">{alert.evidence.summary}</p>
+                </Dialog.Description>
                 <p>Activity: {alert.evidence.activityName}</p>
                 <p>Item: {alert.evidence.itemName}</p>
                 <p>State: {ITEM_STATE_LABELS[alert.evidence.inventoryState]}</p>
@@ -149,7 +190,7 @@ export function DemoWorkspace() {
         <button
           type="button"
           className="fixed bottom-4 right-4 max-w-sm rounded-2xl bg-[var(--ink)] px-4 py-3 text-left text-sm text-[var(--paper)]"
-          onClick={() => setSelectedAlert(session.notifications[0].alertId)}
+          onClick={(event) => openAlert(session.notifications[0].alertId, event.currentTarget)}
         >
           {session.notifications[0].title}
         </button>
@@ -276,27 +317,44 @@ function AlertPanel({
   session,
   onOpen,
   onAck,
+  onSnooze,
 }: {
   session: DemoSession
-  onOpen: (id: string) => void
+  onOpen: (id: string, trigger: HTMLButtonElement) => void
   onAck: (id: string) => void
+  onSnooze: (id: string) => void
 }) {
-  const unresolved = session.alerts.filter((alert) => ['active', 'acknowledged', 'suppressed'].includes(alert.status))
+  const visible = session.alerts.filter(isAlertVisible)
+  const countable = session.alerts.filter(isAlertCountable)
   return (
     <section className="rounded-3xl border border-black/8 bg-[var(--paper-strong)] p-5">
       <h2 className="text-2xl">Alerts</h2>
-      {unresolved.length === 0 ? <p className="mt-3 text-sm text-[var(--graphite)]">No active alerts.</p> : null}
+      <p className="mt-2 text-sm text-[var(--graphite)]" data-testid="alert-count">
+        {countable.length} actionable
+      </p>
+      {visible.length === 0 ? <p className="mt-3 text-sm text-[var(--graphite)]">No active alerts.</p> : null}
       <ul className="mt-3 space-y-2">
-        {unresolved.map((alert) => (
+        {visible.map((alert) => (
           <li key={alert.id} className="rounded-2xl bg-[var(--paper)] p-3">
             <p className="font-medium">{alert.evidence.itemName}</p>
             <p className="text-sm text-[var(--graphite)]">{alert.type}</p>
+            <p className="text-xs capitalize text-[var(--graphite)]">{alert.status}</p>
             <div className="mt-2 flex gap-2">
-              <Button type="button" size="sm" data-testid="explain-alert" onClick={() => onOpen(alert.id)}>
+              <Button
+                type="button"
+                size="sm"
+                data-testid="explain-alert"
+                onClick={(event) => onOpen(alert.id, event.currentTarget)}
+              >
                 Explain
               </Button>
-              <Button type="button" size="sm" variant="ghost" onClick={() => onAck(alert.id)}>
-                Acknowledge
+              {isAlertActionable(alert) ? (
+                <Button type="button" size="sm" variant="ghost" onClick={() => onAck(alert.id)}>
+                  Acknowledge
+                </Button>
+              ) : null}
+              <Button type="button" size="sm" variant="ghost" onClick={() => onSnooze(alert.id)}>
+                Snooze 30 min
               </Button>
             </div>
           </li>

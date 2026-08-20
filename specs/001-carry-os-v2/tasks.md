@@ -1,5 +1,7 @@
 # Tasks: CarryOS v2
 
+> Historical generation checklist. It is not current execution status or acceptance evidence. The reachable v2 product uses the Algorithms/Notebook scenario documented in `README.md`, `docs/architecture.md`, and `docs/acceptance-matrix.md`.
+
 **Input**: Design documents from `/specs/001-carry-os-v2/`
 
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/

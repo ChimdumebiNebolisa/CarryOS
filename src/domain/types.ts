@@ -1,4 +1,4 @@
-export const DEMO_NOW = '2026-08-05T08:21:00-05:00'
+export const DEMO_NOW = '2026-08-05T09:21:00-05:00'
 export const TIME_ZONE = 'America/Chicago'
 
 export type ActivityType = 'class' | 'exam-lab' | 'internship'
@@ -13,7 +13,7 @@ export type ItemStateStatus =
   | 'not-detected'
   | 'unknown'
   | 'stale'
-export type ReadinessState = 'ready' | 'missing' | 'uncertain' | 'scan-required' | 'sensor-unavailable'
+export type ReadinessState = 'ready' | 'missing' | 'uncertain' | 'scan-required' | 'sensor-unavailable' | 'not-applicable'
 export type AlertType = 'missing-item' | 'uncertain-item'
 export type AlertStatus = 'active' | 'acknowledged' | 'suppressed' | 'resolved' | 'expired'
 export type LocationHint = 'inside' | 'outside' | 'unknown'
@@ -35,7 +35,11 @@ export type TraceEventName =
   | 'inventory-state-recalculated'
   | 'alert-created'
   | 'alert-updated'
+  | 'alert-acknowledged'
+  | 'alert-suppressed'
+  | 'alert-reactivated'
   | 'alert-resolved'
+  | 'alert-expired'
   | 'notification-emitted'
   | 'reader-disconnected'
   | 'reader-reconnected'
@@ -128,6 +132,7 @@ export interface Alert {
   stateVersion: number
   createdAt: string
   updatedAt: string
+  snoozedUntil?: string
   resolvedAt?: string
   evidence: AlertEvidence
 }
@@ -206,5 +211,3 @@ export const ITEM_STATE_LABELS: Record<ItemStateStatus, string> = {
   unknown: 'Unknown',
   stale: 'Stale',
 }
-
-export const UNRESOLVED_ALERT_STATUSES: AlertStatus[] = ['active', 'acknowledged', 'suppressed']

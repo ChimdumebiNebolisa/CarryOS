@@ -34,10 +34,14 @@ Copy `.env.example` to `.env.local`:
 ```text
 OPENAI_API_KEY=
 OPENAI_MODEL=
+OPENAI_BASE_URL=https://api.openai.com/v1/responses
+TRUST_PROXY=false
 NEXT_PUBLIC_GITHUB_REPOSITORY_URL=https://github.com/ChimdumebiNebolisa/CarryOS
 ```
 
 Never prefix secrets with `NEXT_PUBLIC_`.
+
+Set `TRUST_PROXY=true` only when a trusted reverse proxy overwrites forwarding headers. Vercel deployments enable trusted-proxy handling automatically.
 
 ## Commands
 

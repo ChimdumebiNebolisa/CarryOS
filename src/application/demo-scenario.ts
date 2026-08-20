@@ -1,6 +1,6 @@
 import { simulateClosedBagScan, DEFAULT_PRESENT_ITEM_IDS, type ReadQuality, type SimulatedTagConfig } from '@/adapters/inventory/simulated-rfid'
 import { estimateTravel } from '@/adapters/travel/simulated-travel'
-import { evaluateAlerts, acknowledgeAlert, suppressAlert } from '@/domain/alerts'
+import { evaluateAlerts, acknowledgeAlert, isAlertActionable, suppressAlert } from '@/domain/alerts'
 import { evaluateInventory } from '@/domain/inventory'
 import { getReadiness } from '@/domain/readiness'
 import { calculateLeaveBy } from '@/domain/timing'
@@ -122,6 +122,27 @@ function pushTrace(session: DemoSession, name: TraceEvent['name'], detail: strin
   ].slice(0, 80)
 }
 
+function notificationFor(alert: Alert): InAppNotification {
+  return {
+    id: `notice_${alert.id}`,
+    alertId: alert.id,
+    title: alert.type === 'missing-item' ? `${alert.evidence.itemName} not detected` : `${alert.evidence.itemName} is uncertain`,
+    body: alert.evidence.summary,
+  }
+}
+
+function reconcileNotifications(session: DemoSession, newlyActionable: Alert[] = []) {
+  const actionableById = new Map(session.alerts.filter(isAlertActionable).map((alert) => [alert.id, alert]))
+  const retained = session.notifications
+    .filter((notification) => actionableById.has(notification.alertId))
+    .map((notification) => notificationFor(actionableById.get(notification.alertId)!))
+  const retainedIds = new Set(retained.map((notification) => notification.alertId))
+  const additions = newlyActionable
+    .filter((alert) => !retainedIds.has(alert.id))
+    .map(notificationFor)
+  session.notifications = [...additions, ...retained].slice(0, 20)
+}
+
 function recompute(session: DemoSession, previousAlerts = session.alerts) {
   session.inventory = evaluateInventory(session.items, session.scans, session.observations, {
     now: session.now,
@@ -147,18 +168,15 @@ function recompute(session: DemoSession, previousAlerts = session.alerts) {
   for (const alert of result.resolved) {
     pushTrace(session, 'alert-resolved', `${alert.evidence.itemName} resolved.`)
   }
+  for (const alert of result.expired) {
+    pushTrace(session, 'alert-expired', `${alert.evidence.itemName} expired.`)
+  }
+  for (const alert of result.reactivated) {
+    pushTrace(session, 'alert-reactivated', `${alert.evidence.itemName} is actionable again.`)
+  }
   const decision = shouldNotify(previousAlerts, session.alerts, session.browserPermission)
-  if (decision.emitInApp && result.created[0]) {
-    const alert = result.created[0]
-    session.notifications = [
-      {
-        id: `notice_${alert.id}`,
-        alertId: alert.id,
-        title: alert.type === 'missing-item' ? `${alert.evidence.itemName} not detected` : `${alert.evidence.itemName} is uncertain`,
-        body: alert.evidence.summary,
-      },
-      ...session.notifications,
-    ]
+  reconcileNotifications(session, decision.alerts)
+  if (decision.emitInApp) {
     pushTrace(session, 'notification-emitted', 'In-app notification emitted.')
   }
 }
@@ -316,11 +334,26 @@ export function setSuggestions(session: DemoSession, suggestions: CarryProfileRe
 }
 
 export function acknowledge(session: DemoSession, alertId: string): DemoSession {
-  return { ...session, alerts: acknowledgeAlert(session.alerts, alertId, session.now) }
+  const next = { ...session, alerts: acknowledgeAlert(session.alerts, alertId, session.now) }
+  const transitioned = session.alerts.some(
+    (alert) => alert.id === alertId && alert.status === 'active' && next.alerts.find((candidate) => candidate.id === alertId)?.status === 'acknowledged',
+  )
+  reconcileNotifications(next)
+  if (transitioned) pushTrace(next, 'alert-acknowledged', `${next.alerts.find((alert) => alert.id === alertId)?.evidence.itemName ?? 'Alert'} acknowledged.`)
+  return next
 }
 
 export function suppress(session: DemoSession, alertId: string): DemoSession {
-  return { ...session, alerts: suppressAlert(session.alerts, alertId, session.now) }
+  const next = { ...session, alerts: suppressAlert(session.alerts, alertId, session.now) }
+  const transitioned = session.alerts.some(
+    (alert) =>
+      alert.id === alertId &&
+      (alert.status === 'active' || alert.status === 'acknowledged') &&
+      next.alerts.find((candidate) => candidate.id === alertId)?.status === 'suppressed',
+  )
+  reconcileNotifications(next)
+  if (transitioned) pushTrace(next, 'alert-suppressed', `${next.alerts.find((alert) => alert.id === alertId)?.evidence.itemName ?? 'Alert'} snoozed.`)
+  return next
 }
 
 export function expectedLeaveBy(): string {

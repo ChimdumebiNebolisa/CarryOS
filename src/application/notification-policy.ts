@@ -1,8 +1,9 @@
-import { UNRESOLVED_ALERT_STATUSES, type Alert } from '@/domain/types'
+import type { Alert } from '@/domain/types'
 
 export interface NotificationDecision {
   emitInApp: boolean
   emitBrowser: boolean
+  alerts: Alert[]
 }
 
 export function shouldNotify(
@@ -10,20 +11,15 @@ export function shouldNotify(
   next: Alert[],
   browserPermission: NotificationPermission | 'unsupported',
 ): NotificationDecision {
-  const previousUnresolved = new Set(
-    previous
-      .filter((alert) => UNRESOLVED_ALERT_STATUSES.includes(alert.status))
-      .map((alert) => `${alert.activityId}:${alert.itemId}`),
-  )
-  const newUnresolved = next.filter(
-    (alert) =>
-      alert.status === 'active' &&
-      !previousUnresolved.has(`${alert.activityId}:${alert.itemId}`),
+  const previousById = new Map(previous.map((alert) => [alert.id, alert]))
+  const newlyActionable = next.filter(
+    (alert) => alert.status === 'active' && previousById.get(alert.id)?.status !== 'active',
   )
 
-  const emitInApp = newUnresolved.length > 0
+  const emitInApp = newlyActionable.length > 0
   return {
     emitInApp,
     emitBrowser: emitInApp && browserPermission === 'granted',
+    alerts: newlyActionable,
   }
 }

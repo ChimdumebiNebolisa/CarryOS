@@ -14,58 +14,55 @@
 
 - Q: What default public source URL should the secondary action use before a v2 remote exists? → A: Use the v1 public repository URL as the configured default, overridable by environment, and never invent a live deployment URL.
 - Q: How should a throttled suggestion request be explained to the visitor? → A: Show a safe retryable message that suggestions are temporarily limited; do not expose provider or infrastructure details.
-- Q: When reduced motion is requested, which hero state is shown? → A: Show a stable Missing state for the Calculus II calculator scenario, with equivalent text status.
+- Q: Which public proof is authoritative? → A: The landing reconciliation proof is derived from the shared Algorithms/Notebook domain scenario; the hero itself is a static product illustration.
 
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Understand the product in ten seconds (Priority: P1)
 
-A visitor opens the public site with no login and no model credentials. They see a direct headline, a supporting promise, one dominant live-demo action, a source link, a simulated-inventory disclosure, and an authentic product surface showing Carry states rather than a generic dashboard.
+A visitor opens the public site with no login and no model credentials. They see a direct headline, supporting product explanation, a source link, and an evidence-backed landing proof rather than a generic dashboard.
 
 **Why this priority**: Reviewers must understand the product immediately. If this fails, later technical depth does not matter.
 
-**Independent Test**: Open the public page and confirm the promise, disclosure, primary action, source link, and live product states are visible without setup.
+**Independent Test**: Open the public page and confirm the promise, source link, explanatory sections, and domain-derived proof are visible without setup.
 
 **Acceptance Scenarios**:
 
-1. **Given** a first-time visitor on the public page, **When** the page loads, **Then** they see “Carry less uncertainty,” the supporting line about understanding what matters before leaving, one dominant “Run the live demo” action, and a source link.
-2. **Given** the public page, **When** the visitor views the hero, **Then** they see a simulated-inventory disclosure and live Carry states rather than a screenshot, testimonial, pricing block, or generic analytics mock.
-3. **Given** the public page, **When** the visitor activates the primary action, **Then** they enter the full technical demo with no login.
-4. **Given** the public page, **When** the visitor activates the source link, **Then** they open the configured public repository.
+1. **Given** a first-time visitor on the public page, **When** the page loads, **Then** they see “Know before you go,” the supporting product promise, and a source link.
+2. **Given** the public page, **When** the visitor reads the product sections, **Then** the inventory relationship shown comes from the shared deterministic scenario.
+3. **Given** the public page, **When** the visitor activates the source link, **Then** they open the configured public repository.
 
 ---
 
-### User Story 2 - Preview authentic Carry states in the hero (Priority: P1)
+### User Story 2 - Present authentic Carry evidence on the landing page (Priority: P1)
 
-The hero previews the fixed Calculus II demonstration: awaiting evidence, reading a closed-bag snapshot, calculator not detected, and ready. The preview uses the same decision logic as the full demo, can play once, supports manual navigation, pauses when hidden or offscreen, and respects reduced motion.
+The landing proof adapts the fixed Algorithms demonstration and its Notebook-missing reconciliation from the same decision engine used by the full demo. The hero remains a static product illustration.
 
 **Why this priority**: The hero is the proof that Carry is a product, not a concept page.
 
-**Independent Test**: Watch or step through hero states and confirm each state matches the shared demonstration scenario, including reduced-motion and pause behavior.
+**Independent Test**: Confirm the landing reconciliation rows and missing-item reason match the shared demonstration scenario.
 
 **Acceptance Scenarios**:
 
-1. **Given** the public page and the Calculus II demonstration, **When** the hero sequence runs, **Then** it shows awaiting evidence, scanning, calculator not detected, and ready, then pauses after one sequence.
-2. **Given** the hero, **When** the visitor selects a state manually, **Then** the front surface shows that authentic Carry state and remains readable.
-3. **Given** reduced motion, **When** the public page loads, **Then** a stable Missing state is shown with equivalent text status and no transform-based entrance motion.
-4. **Given** the hero is offscreen or the document is hidden, **When** autoplay would otherwise continue, **Then** the sequence pauses.
+1. **Given** the public page and canonical Algorithms demonstration, **When** the landing proof is built, **Then** Laptop, Charger, and Umbrella are matched and Notebook is missing.
+2. **Given** reduced motion, **When** the public page loads, **Then** its content remains usable without motion-dependent meaning.
 
 ---
 
-### User Story 3 - Complete the missing-calculator proof (Priority: P1)
+### User Story 3 - Complete the missing-Notebook proof (Priority: P1)
 
-A visitor completes the core demonstration without setup: close the bag, see the calculator missing, inspect the warning, add the calculator, rescan, and see Ready for Calculus II. The landing-page proof and the full demo use the same decision engine.
+A visitor completes the core demonstration without setup: close the bag, see Notebook missing, inspect the warning, add Notebook, rescan, and see Ready for Algorithms. The landing proof and full demo use the same decision engine.
 
 **Why this priority**: This is the primary product proof and the 60-second demo.
 
-**Independent Test**: From a fresh load, complete scan → warning → add calculator → rescan → Ready in under 60 seconds.
+**Independent Test**: From a fresh load, complete scan → warning → add Notebook → rescan → Ready in under 60 seconds.
 
 **Acceptance Scenarios**:
 
-1. **Given** Calculus II with laptop, notebook, and student ID in the bag and calculator absent, **When** the visitor closes the bag and a valid scan completes, **Then** laptop, notebook, and student ID are Confirmed, calculator is Not detected, readiness is Missing, and one unresolved calculator warning exists.
+1. **Given** Algorithms with Laptop, Charger, and Umbrella in the bag and Notebook absent, **When** the visitor closes the bag and a valid scan completes, **Then** the present required items are Confirmed, Notebook is Not detected, readiness is Missing, and one unresolved Notebook warning exists.
 2. **Given** that warning, **When** the visitor opens the explanation, **Then** they see activity, required item, latest scan time, inventory state, evidence level, leave-by time, and the next action.
-3. **Given** an unresolved calculator warning and an open bag, **When** the visitor adds the calculator, closes the bag, and a valid scan completes, **Then** calculator is Confirmed, the warning is Resolved, readiness is Ready for Calculus II, and no second unresolved calculator warning exists.
-4. **Given** the public working proof, **When** the visitor completes the same calculator interaction, **Then** the result comes from the same decision engine as the full demo and a simulation disclosure remains visible beside the proof.
+3. **Given** an unresolved Notebook warning and an open bag, **When** the visitor adds Notebook, closes the bag, and a valid scan completes, **Then** Notebook is Confirmed, the warning is Resolved, readiness is Ready for Algorithms, and no second unresolved warning exists.
+4. **Given** the public landing proof, **When** it renders the missing relationship, **Then** the result comes from the same decision engine as the full demo.
 
 ---
 
@@ -80,7 +77,7 @@ A reviewer uses the full demo workspace to inspect activity context, leave-by ti
 **Acceptance Scenarios**:
 
 1. **Given** a visitor with no account, **When** they open the demo, **Then** they see current activity, start time, destination, leave-by, readiness, inventory memory, required and optional items, sensor controls, alert area, AI generator, trace, simulation disclosure, and reset.
-2. **Given** the demo, **When** the visitor resets, **Then** the fixed demonstration clock, Calculus II requirements, initial bag contents, connected reader, empty alerts, and initialization-only trace are restored.
+2. **Given** the demo, **When** the visitor resets, **Then** the fixed demonstration clock, Algorithms requirements, initial bag contents, connected reader, empty alerts, cleared transient UI state, and deterministic reset trace are restored.
 3. **Given** the demo, **When** the visitor inspects inventory, **Then** they can distinguish Confirmed, Probable, Not detected, Unknown, and Stale, and can tell inventory confidence apart from AI suggestion confidence.
 
 ---
@@ -173,34 +170,34 @@ Carry shows a mandatory in-app notification for a new unresolved missing-item co
 
 ### Functional Requirements
 
-- **FR-001**: The public page MUST communicate Carry’s promise, simulated-inventory disclosure, one dominant demo action, and a source link without requiring login or model credentials.
-- **FR-002**: The hero MUST display authentic Carry states for awaiting evidence, scanning, missing calculator, and ready, using the same decision logic as the full demo.
-- **FR-003**: The hero MUST support one automatic preview sequence, manual state navigation, pause when hidden or offscreen, and a stable Missing composition under reduced motion.
-- **FR-004**: The public page MUST include a simplified working missing-calculator interaction that uses the same decision engine as the full demo.
-- **FR-005**: The public page MUST follow a fixed section order: hero, working proof, belief and uncertainty, AI suggestion boundary, technical architecture, honest limitations, final call to action. It MUST NOT add testimonials, pricing, long FAQ, customer logos, team, or generic feature grids.
+- **FR-001**: The public page MUST communicate Carry’s promise and provide a source link without requiring login or model credentials.
+- **FR-002**: The landing reconciliation proof MUST use the same deterministic scenario and decision logic as the full demo.
+- **FR-003**: The public page MUST preserve equivalent meaning and usability under reduced motion.
+- **FR-004**: The public page MUST include a simplified missing-Notebook proof derived from the shared decision engine.
+- **FR-005**: The public page MUST follow the reachable section order: hero, How Carry works, Day changes, inventory proof, and closing product moment.
 - **FR-006**: The full demo MUST expose activity context, timing, readiness, inventory memory, sensor controls, alerts, alert detail, AI generation, requirement approval, developer trace, simulation disclosure, and reset.
-- **FR-007**: The product MUST include eight registered items and three activity profiles, with Calculus II as the default demonstration.
-- **FR-008**: The demonstration clock MUST be fixed at 8:21 AM for a 9:00 AM Calculus II activity with 18 minutes travel and 7 minutes departure buffer, producing leave-by 8:35 AM, and MUST be labeled as a demonstration scenario.
-- **FR-009**: The initial demonstration bag MUST contain laptop sleeve, notebook, and student ID holder, with calculator absent.
+- **FR-007**: The product MUST include the registered item catalog and three activity profiles, with Algorithms as the default demonstration.
+- **FR-008**: The demonstration clock MUST be fixed at 9:21 AM for a 10:00 AM Algorithms activity with 18 minutes travel and 7 minutes departure buffer, producing leave-by 9:35 AM, and MUST be labeled as a demonstration scenario.
+- **FR-009**: The initial demonstration bag MUST contain Laptop, Charger, and Umbrella, with Notebook absent.
 - **FR-010**: Visitors MUST be able to open the bag, close the bag and scan, add or remove items, set strong/weak/intermittent reads, mark outside-bag test input, arm a failed scan, disconnect or reconnect the reader, and reset the scenario.
 - **FR-011**: Inventory evaluation MUST produce Confirmed, Probable, Not detected, Unknown, and Stale according to the evidence rules in the approved product specification.
-- **FR-012**: Readiness MUST be evaluated in this order: Sensor unavailable, Scan required, Missing, Uncertain, Ready. Ready MUST require every required item to be Confirmed by a recent valid closed-bag scan. Optional items MUST NEVER block Ready.
+- **FR-012**: Readiness MUST first return Not applicable for a canceled, completed, active, or already-started activity, then evaluate Sensor unavailable, Scan required, Missing, Uncertain, and Ready. Ready MUST require exactly one valid state for every required item and a recent valid closed-bag scan. Optional items MUST NEVER block Ready.
 - **FR-013**: Confirmed MUST require a successful recent closed-bag scan, no outside test hint, sufficient consecutive reads, sufficient signal when provided, and no bag opening after the scan.
 - **FR-014**: A failed scan MUST be recorded and MUST NOT create new inventory truth, a missing-item warning, or Ready.
 - **FR-015**: Leave-by MUST equal activity start minus travel duration minus departure buffer when timing is available, and MUST NOT be invented when timing is unavailable.
-- **FR-016**: Carry MUST support missing-item and uncertain-item warnings with active, acknowledged, suppressed, resolved, and expired statuses.
-- **FR-017**: There MUST be at most one unresolved warning for the same activity and item. Missing/uncertain transitions MUST update that warning rather than create a second one.
+- **FR-016**: Carry MUST support missing-item and uncertain-item warnings with explicit active, acknowledged, suppressed, resolved, and expired transitions. Suppressed warnings MUST reactivate after a valid snooze deadline; canceled activities and removed requirements MUST resolve warnings; started or completed activities MUST expire them.
+- **FR-017**: There MUST be at most one unresolved warning for the same activity and item. Missing/uncertain transitions MUST update that warning and refresh its evidence rather than create a second one.
 - **FR-018**: Warning explanations MUST include activity, required item, latest scan time, inventory state, evidence level, leave-by time when available, and recommended next action.
-- **FR-019**: In-app notification is mandatory for a new unresolved missing-item condition inside the actionable window. Browser notification is optional and MUST request permission only after an explicit visitor action.
-- **FR-020**: Duplicate evaluations of an unchanged unresolved condition MUST NOT emit duplicate notifications.
+- **FR-019**: In-app notification is mandatory for a newly active warning inside the actionable window. Browser notification is optional and MUST request permission only after an explicit visitor action. Only active warnings are actionable and countable; acknowledged warnings remain visible, while suppressed, resolved, and expired warnings are hidden.
+- **FR-020**: Notifications MUST reconcile with warning status and evidence. Duplicate evaluations of an unchanged active condition MUST NOT emit duplicate notifications; reactivation after snooze or material evidence change MAY notify again.
 - **FR-021**: A suggestion service MUST accept event context plus registered items, return required/optional/excluded/unregistered suggestions, and MUST NOT change readiness until a registered suggestion is explicitly approved.
 - **FR-022**: Suggestion output MUST reject unknown identifiers, duplicates, multi-category items, out-of-range confidence, and more than eight total suggestions. Raw unvalidated output MUST NEVER reach the visitor.
 - **FR-023**: If the model is unavailable, times out, is rate-limited, or returns invalid output after at most one repair retry, the visitor MUST receive labeled deterministic fallback or a safe retryable error.
 - **FR-024**: Fallback MUST use event type, explicit registered-item name mentions, and simple approved rule profiles, and MUST be labeled as deterministic fallback rather than AI inference.
 - **FR-025**: Unregistered suggestions MUST NEVER affect readiness.
 - **FR-026**: The developer trace MUST record typed events for activity load, travel estimate, inference, validation, fallback, approval, rejection, bag/scan lifecycle, inventory recalculation, alert lifecycle, notification, and reader connectivity, without secrets, full prompts, chain-of-thought, or sensitive headers.
-- **FR-027**: Reset MUST restore the canonical demonstration: fixed clock, Calculus II, default requirements, initial bag, connected reader, no scans, no alerts, and an initialization-only trace.
-- **FR-028**: Manual requirement changes and demonstration-profile reset MUST be available in the demo.
+- **FR-027**: Reset MUST restore the canonical demonstration: fixed clock, Algorithms, default requirements, initial bag, connected reader, no scans, no alerts, cleared transient UI state, and a deterministic reset trace.
+- **FR-028**: Requirement changes through explicit suggestion approval and demonstration-profile reset MUST be available in the demo.
 - **FR-029**: Inventory confidence and AI suggestion confidence MUST be visually and semantically separate.
 - **FR-030**: Simulated inventory MUST be disclosed beside product proof. The product MUST NOT claim physical RFID validation or solved inside-versus-outside hardware classification.
 - **FR-031**: All controls MUST be keyboard reachable, use visible focus, trap and restore focus in dialogs, expose live scan/alert status in text, and remain usable under reduced motion.
@@ -223,8 +220,8 @@ Carry shows a mandatory in-app notification for a new unresolved missing-item co
 ### Measurable Outcomes
 
 - **SC-001**: A first-time visitor can state what Carry does after no more than ten seconds on the public page.
-- **SC-002**: A reviewer can complete the missing-calculator flow from a fresh load in under 60 seconds and see Ready only after the calculator is added and freshly scanned.
-- **SC-003**: After a valid missing-calculator scan, exactly one unresolved calculator warning exists; after a confirming rescan, that warning is resolved and no second unresolved calculator warning exists.
+- **SC-002**: A reviewer can complete the missing-Notebook flow from a fresh load in under 60 seconds and see Ready only after Notebook is added and freshly scanned.
+- **SC-003**: After a valid missing-Notebook scan, exactly one unresolved Notebook warning exists; after a confirming rescan, that warning is resolved and no second unresolved Notebook warning exists.
 - **SC-004**: Submitting event context without model credentials still returns usable labeled fallback suggestions, and the rest of the demo remains operable.
 - **SC-005**: Approving or rejecting suggestions changes the activity checklist only for approved registered items; readiness does not change from unapproved model output.
 - **SC-006**: A failed scan, opened bag after evidence, or required item without current confirmed evidence never produces Ready.
