@@ -1,9 +1,9 @@
 export function ArchitectureSection() {
   return (
-    <section className="border-y border-black/8 bg-[var(--forest)] px-4 py-20 text-[var(--paper)] sm:px-6">
+    <section id="how-it-works" className="border-y border-black/8 bg-[var(--forest)] px-4 py-20 text-[var(--paper)] sm:px-6 lg:py-28">
       <div className="mx-auto max-w-6xl">
-        <p className="mono text-xs uppercase tracking-[0.18em] text-white/55">Architecture</p>
-        <h2 className="mt-3 max-w-3xl text-4xl">Event context becomes an intervention only after evidence.</h2>
+        <p className="mono text-xs uppercase tracking-[0.18em] text-white/55">07 / How Carry works</p>
+        <h2 className="mt-3 max-w-3xl text-5xl leading-[0.92] sm:text-6xl">A clear loop from context to action.</h2>
         <ol className="mt-8 grid gap-4 md:grid-cols-2">
           {[
             'Event context',

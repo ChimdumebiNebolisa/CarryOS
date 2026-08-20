@@ -13,13 +13,13 @@ export function WorkingProof() {
   )
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+    <section id="observed" className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
       <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div>
-          <p className="mono text-xs uppercase tracking-[0.18em] text-[var(--graphite)]">Working proof</p>
-          <h2 className="mt-3 text-4xl">The missing calculator, for real.</h2>
+          <p className="mono text-xs uppercase tracking-[0.18em] text-[var(--graphite)]">03 / Observed bag state</p>
+          <h2 className="mt-3 text-5xl leading-[0.92] sm:text-6xl">The bag tells a different story.</h2>
           <p className="mt-4 max-w-xl text-[var(--ink-soft)]">
-            This uses the same domain engine as the full demo. Close the bag, inspect the warning, add the calculator, and watch Ready appear.
+            Close the bag and let the real CarryOS engine compare the requirements with the observed contents. The calculator is missing, so Carry says so.
           </p>
           <p className="mt-4 text-sm text-[var(--graphite)]">
             Simulated RFID. The bag starts with a laptop sleeve, notebook, and student ID. The calculator is absent.

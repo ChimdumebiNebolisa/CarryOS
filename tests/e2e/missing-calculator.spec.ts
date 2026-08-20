@@ -2,7 +2,10 @@ import { expect, test } from '@playwright/test'
 
 test('landing CTA opens the demo', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: 'Carry less uncertainty.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Your backpack should know what the day asks of you.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'The day gives the bag a job.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Expected is not the same as observed.' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'View the source ↗' }).first()).toBeVisible()
   await page.getByTestId('run-demo').click()
   await expect(page).toHaveURL(/\/demo/)
   await expect(page.getByTestId('readiness')).toHaveText('Scan required')

@@ -6,6 +6,8 @@ export type HeroStateId = 'awaiting' | 'scanning' | 'missing' | 'ready'
 export interface HeroSnapshot {
   id: HeroStateId
   kicker: string
+  activityName: string
+  destination: string
   title: string
   detail: string
   readiness: Readiness
@@ -20,6 +22,8 @@ function snapshotFrom(session: DemoSession, id: HeroStateId, overlay?: Partial<H
   return {
     id,
     kicker: session.activity.name,
+    activityName: session.activity.name,
+    destination: session.activity.destination.name,
     title: session.readiness.label,
     detail: session.readiness.detail,
     readiness: session.readiness,
