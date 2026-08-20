@@ -1,0 +1,27 @@
+# Acceptance matrix
+
+See the PRD IDs. Bootstrap verification:
+
+| ID | Result | Evidence |
+|----|--------|----------|
+| P-01 | PASS | Landing headline and copy |
+| P-02 | PASS | E2E CTA |
+| P-07 | PASS | E2E missing calculator |
+| P-08 | PASS | E2E rescan Ready |
+| D-01 | PASS | Unit tests |
+| D-02 | PASS | Unit + e2e stale |
+| D-03 | PASS | Unit + e2e failed scan |
+| AI-01 | PASS | Route Handler + API tests |
+| AI-05 | PASS | Fallback API test |
+| O-04 | PASS | `npm test` |
+| O-09 | PASS | `AGENTS.md` |
+
+## Final bootstrap gates
+
+| ID | Result | Evidence |
+|----|--------|----------|
+| T054 | PASS | `.styleseed/evidence/site-home/t054/deterministic.json` and `.styleseed/evidence/demo-workspace/t054/deterministic.json` show no findings; rendered style check snapshots exist in CarryOS-next output |
+| T055 | PASS WITH RESIDUAL RISK | real API credentials not provided; fallback behavior validated in API tests |
+| Spec Kit convergence | PASS | full lifecycle artifacts (`specs/001-carry-os-v2`, `.specify`, `.styleseed`) present and acceptance checks passing |
+
+Live model-provider call remains PASS WITH RESIDUAL RISK until credentials are available.

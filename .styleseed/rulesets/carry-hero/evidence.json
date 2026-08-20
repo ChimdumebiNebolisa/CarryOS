@@ -1,0 +1,9 @@
+{
+  "checks": [
+    "Hierarchy must show a single clear hero prompt in first viewport",
+    "Primary CTA must be the first action and visually dominant",
+    "Landing states must include unknown/missing/ready proof states tied to deterministic logic",
+    "Inventory and travel context signals must use semantic cues not ad-hoc accent colors",
+    "Motion must provide reduced-motion fallback"
+  ]
+}

@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 2,
+  "artifactId": "demo-workspace",
+  "engineVersion": "4.0.0",
+  "engineRevision": "sha256:b4c9fe60d350f02774133d8b9958160f4fa8b277c9a4168cb6a5826a369d1f86",
+  "distributionIntegrity": "verified",
+  "selection": {
+    "agent": "codex",
+    "grammar": "reference:carry-hero",
+    "grammarSource": "project:.styleseed/rulesets/carry-hero/RULESET.md",
+    "referenceContract": "reference-contract-v2",
+    "fallback": "operations-console",
+    "adapter": "product-ui",
+    "domain": "education",
+    "page": "dashboard",
+    "recipe": "enterprise-workbench",
+    "recipeSelection": "enterprise-workbench",
+    "palette": "quiet-mineral",
+    "paletteSelection": "quiet-mineral",
+    "paletteGeneration": {
+      "keyColor": "#2F6F4E",
+      "mode": "light",
+      "character": "deep",
+      "harmony": "tonal",
+      "temperature": "warm"
+    },
+    "profile": "none"
+  },
+  "inputs": [
+    {
+      "id": "project",
+      "path": ".styleseed/project.json",
+      "sha256": "sha256:72797fb91034b8c588a9ff618902923ef0c0607f538f18d0b2048f0cb6005cf5",
+      "bytes": 747
+    },
+    {
+      "id": "artifact",
+      "path": ".styleseed/artifacts/demo-workspace.json",
+      "sha256": "sha256:9f8d4be3f6515703ac703901da59856b87ea1369f659e769fe822af0dd2a4293",
+      "bytes": 1672
+    }
+  ],
+  "sources": [
+    {
+      "id": "agent-execution",
+      "path": "catalog:agents",
+      "sha256": "sha256:dfe4b0a2de36209ca50a04b39e35c248ac13fb8b059428fdb68a484cffc190cb",
+      "bytes": 329
+    },
+    {
+      "id": "core",
+      "path": "catalog:core",
+      "sha256": "sha256:6002465c13e879fb190387117049eb4484a3ce908c9f8af1648882c870194266",
+      "bytes": 5394
+    },
+    {
+      "id": "grammar",
+      "path": "project:.styleseed/rulesets/carry-hero/RULESET.md",
+      "sha256": "sha256:004439d81a47babd0421f77cd602f4ab47837d025174215646704cb99341c78f",
+      "bytes": 2094
+    },
+    {
+      "id": "adapter",
+      "path": "catalog:adapters/product-ui",
+      "sha256": "sha256:7b5b5c34b0b235dca329e6384ccb94c66ee65a348bbe7142277ae7bbda3c13b0",
+      "bytes": 714
+    },
+    {
+      "id": "domain",
+      "path": "catalog:domains/education",
+      "sha256": "sha256:8192f7a04edd7ea2466685e4418cbbde7913f77bd7237f78ac4fcd11436bd8a4",
+      "bytes": 951
+    },
+    {
+      "id": "page",
+      "path": "catalog:pages/dashboard",
+      "sha256": "sha256:dad3ba4be04cf4ce9cb7457fc0fe22dac9d45c70618650a667b08fd1fa72a42a",
+      "bytes": 785
+    },
+    {
+      "id": "recipe",
+      "path": "catalog:recipes/enterprise-workbench",
+      "sha256": "sha256:0b472aa9cccada93e1c5c0260070bbfcda76a75d7de61e2cb22938c39981aaf8",
+      "bytes": 1304
+    },
+    {
+      "id": "palette",
+      "path": "catalog:palettes/quiet-mineral",
+      "sha256": "sha256:70d7ba83916f9c624950b65ab7370977a9d78dc0b694e34354f625b36ad5dc7e",
+      "bytes": 2189
+    },
+    {
+      "id": "craft",
+      "path": "catalog:craft",
+      "sha256": "sha256:9f8b9c38d3ec1dc6d476a149b7c3502b27c51cbb55bce397a696b44335a22d21",
+      "bytes": 3564
+    },
+    {
+      "id": "reference:RULESET.md",
+      "path": ".styleseed/rulesets/carry-hero/RULESET.md",
+      "sha256": "sha256:69e5799260f774e569576a95f04b72c88cbe516a72ca6a21fa6195e4f6b7074f",
+      "bytes": 648
+    },
+    {
+      "id": "reference:tokens.json",
+      "path": ".styleseed/rulesets/carry-hero/tokens.json",
+      "sha256": "sha256:727ebf9922ed2433d8910f76f7a52b575cde4d94dd189ac1cb44eb3ed006a303",
+      "bytes": 333
+    },
+    {
+      "id": "reference:evidence.json",
+      "path": ".styleseed/rulesets/carry-hero/evidence.json",
+      "sha256": "sha256:114be3834b8274de276d7dd1307ab2c85a1d837c1c9235c79f78bbc6d445c85a",
+      "bytes": 399
+    },
+    {
+      "id": "reference:checks.md",
+      "path": ".styleseed/rulesets/carry-hero/checks.md",
+      "sha256": "sha256:518c6eade246c20175b12b70b3c86b9bb0f616d76ce43ad8b622c57edbbc5032",
+      "bytes": 357
+    },
+    {
+      "id": "reference:reference-board.html",
+      "path": ".styleseed/rulesets/carry-hero/reference-board.html",
+      "sha256": "sha256:6b2dd6055ddf26702ae758c464028a8c80c570feaa4f0e45fb5a7edfe2720363",
+      "bytes": 199
+    },
+    {
+      "id": "reference:adapter.json",
+      "path": ".styleseed/rulesets/carry-hero/adapter.json",
+      "sha256": "sha256:4bb8e05f7210a8fc41066ab502f7449ffbe66282377c037e0457322673d57576",
+      "bytes": 144
+    }
+  ],
+  "methodHash": "sha256:0e874d6f09cf8b9409ad3ff05c0c2f82babd858d054aa07b4a5e24229a607c75",
+  "validationHash": "sha256:731ab49d0bf0d6aee8162b30c189ef3e740e45aaca5c2d3b5e18478382c7a6a8",
+  "validationSlices": {
+    "target": "sha256:43c2fe7b3ca3af9c8536810a5d47d2ba4cb90ee629255f6a317277f11e032965",
+    "implementation": "sha256:eb36e75fc262fa7283ca58560ce2d57d3249d9050f4942da8a3935cd9d7fd39d",
+    "scoreFloor": "sha256:48449a14a4ff7d79bb7a1b6f3d488eba397c36ef25634c111b49baf362511afc",
+    "requiredRenders": "sha256:395fd8679a2efbe792ec8bab8b960745348a123851b6b5ca4abff4eec7c57433",
+    "temporal": "sha256:f875e5e4ffec737c2df3377f624db79e884ce12c3deae125b514653881b02b25",
+    "humanAcceptance": "sha256:b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+  },
+  "bundle": {
+    "kind": "bundle",
+    "path": ".styleseed/bundles/demo-workspace.md",
+    "sha256": "sha256:6c414075f8fc563120ed5a4b23ff9c8da144cba42a24a8e2fc6ddb9d5baa64f7",
+    "bytes": 18239
+  },
+  "outputs": [
+    {
+      "kind": "bundle",
+      "path": ".styleseed/bundles/demo-workspace.md",
+      "sha256": "sha256:6c414075f8fc563120ed5a4b23ff9c8da144cba42a24a8e2fc6ddb9d5baa64f7",
+      "bytes": 18239
+    },
+    {
+      "kind": "palette-json",
+      "path": ".styleseed/palettes/demo-workspace.json",
+      "sha256": "sha256:e86ab06f999bbd104dddb387db1b56e4b44c7ffebc3015d5bf98ea58e28e3193",
+      "bytes": 5899
+    },
+    {
+      "kind": "palette-css",
+      "path": ".styleseed/palettes/demo-workspace.css",
+      "sha256": "sha256:2ae035e500675681648ae0a55c5e5b0af4469757fc28085d75b63d24fb9fa911",
+      "bytes": 1157
+    }
+  ]
+}

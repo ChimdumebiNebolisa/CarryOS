@@ -1,0 +1,326 @@
+import { simulateClosedBagScan, DEFAULT_PRESENT_ITEM_IDS, type ReadQuality, type SimulatedTagConfig } from '@/adapters/inventory/simulated-rfid'
+import { estimateTravel } from '@/adapters/travel/simulated-travel'
+import { evaluateAlerts, acknowledgeAlert, suppressAlert } from '@/domain/alerts'
+import { evaluateInventory } from '@/domain/inventory'
+import { getReadiness } from '@/domain/readiness'
+import { calculateLeaveBy } from '@/domain/timing'
+import { createTraceEvent, redactTraceDetail } from '@/application/trace'
+import { shouldNotify } from '@/application/notification-policy'
+import { scanId } from '@/lib/ids'
+import { DEMO_NOW, type Activity, type Alert, type CarryProfileResult, type InventoryState, type Item, type Readiness, type Scan, type SensorStatus, type TagObservation, type TraceEvent, type TravelEstimate } from '@/domain/types'
+import { ACTIVITIES } from '@/fixtures/activities'
+import { ITEMS } from '@/fixtures/items'
+
+export interface InAppNotification {
+  id: string
+  alertId: string
+  title: string
+  body: string
+}
+
+export interface DemoSession {
+  now: string
+  items: Item[]
+  activity: Activity
+  bagIsOpen: boolean
+  lastBagOpenedAt?: string
+  sensorStatus: SensorStatus
+  failNextScan: boolean
+  travelUnavailable: boolean
+  tags: Record<string, SimulatedTagConfig>
+  scans: Scan[]
+  observations: TagObservation[]
+  inventory: InventoryState[]
+  alerts: Alert[]
+  readiness: Readiness
+  travel?: TravelEstimate
+  trace: TraceEvent[]
+  suggestions: CarryProfileResult | null
+  suggestionDecisions: Record<string, 'approved' | 'rejected'>
+  notifications: InAppNotification[]
+  browserPermission: NotificationPermission | 'default' | 'unsupported'
+  scanSequence: number
+  traceSequence: number
+}
+
+function defaultTags(): Record<string, SimulatedTagConfig> {
+  return Object.fromEntries(
+    ITEMS.map((item) => [
+      item.id,
+      {
+        present: DEFAULT_PRESENT_ITEM_IDS.includes(item.id as (typeof DEFAULT_PRESENT_ITEM_IDS)[number]),
+        quality: 'strong' as ReadQuality,
+        locationHint: 'inside' as const,
+      },
+    ]),
+  )
+}
+
+function cloneActivity(activity: Activity): Activity {
+  return {
+    ...activity,
+    requiredItemIds: [...activity.requiredItemIds],
+    optionalItemIds: [...activity.optionalItemIds],
+  }
+}
+
+export function createDemoSession(now = DEMO_NOW): DemoSession {
+  const activity = cloneActivity(ACTIVITIES[0])
+  const session: DemoSession = {
+    now,
+    items: ITEMS,
+    activity,
+    bagIsOpen: true,
+    sensorStatus: 'connected',
+    failNextScan: false,
+    travelUnavailable: false,
+    tags: defaultTags(),
+    scans: [],
+    observations: [],
+    inventory: [],
+    alerts: [],
+    readiness: {
+      state: 'scan-required',
+      label: 'Scan required',
+      detail: 'No fresh closed-bag evidence yet.',
+      confirmedRequiredCount: 0,
+      requiredCount: activity.requiredItemIds.length,
+    },
+    trace: [],
+    suggestions: null,
+    suggestionDecisions: {},
+    notifications: [],
+    browserPermission: 'default',
+    scanSequence: 0,
+    traceSequence: 0,
+  }
+  const travel = estimateTravel(activity)
+  if (travel.ok) session.travel = travel.estimate
+  pushTrace(session, 'demo-initialized', 'Canonical Calculus II demonstration loaded.')
+  pushTrace(session, 'activity-loaded', `${activity.name} starts at 9:00 AM.`)
+  if (travel.ok) {
+    pushTrace(session, 'travel-estimate-loaded', `Simulated travel 18 minutes. Leave by 8:35 AM.`)
+  }
+  session.inventory = evaluateInventory(session.items, session.scans, session.observations, {
+    now: session.now,
+    bagIsOpen: session.bagIsOpen,
+    lastBagOpenedAt: session.lastBagOpenedAt,
+  })
+  session.readiness = getReadiness(session.activity, session.inventory, session.scans, session.sensorStatus, {
+    now: session.now,
+  })
+  return session
+}
+
+function pushTrace(session: DemoSession, name: TraceEvent['name'], detail: string) {
+  session.traceSequence += 1
+  session.trace = [
+    createTraceEvent(name, session.now, redactTraceDetail(detail), session.traceSequence),
+    ...session.trace,
+  ].slice(0, 80)
+}
+
+function recompute(session: DemoSession, previousAlerts = session.alerts) {
+  session.inventory = evaluateInventory(session.items, session.scans, session.observations, {
+    now: session.now,
+    bagIsOpen: session.bagIsOpen,
+    lastBagOpenedAt: session.lastBagOpenedAt,
+  })
+  session.readiness = getReadiness(session.activity, session.inventory, session.scans, session.sensorStatus, {
+    now: session.now,
+  })
+  pushTrace(session, 'inventory-state-recalculated', `Readiness is ${session.readiness.state}.`)
+  const leaveBy = session.travel?.leaveBy
+  const result = evaluateAlerts(session.activity, session.items, session.inventory, session.scans, session.alerts, {
+    now: session.now,
+    leaveBy,
+  })
+  session.alerts = result.alerts
+  for (const alert of result.created) {
+    pushTrace(session, 'alert-created', `${alert.evidence.itemName}: ${alert.type}.`)
+  }
+  for (const alert of result.updated) {
+    pushTrace(session, 'alert-updated', `${alert.evidence.itemName} changed to ${alert.type}.`)
+  }
+  for (const alert of result.resolved) {
+    pushTrace(session, 'alert-resolved', `${alert.evidence.itemName} resolved.`)
+  }
+  const decision = shouldNotify(previousAlerts, session.alerts, session.browserPermission)
+  if (decision.emitInApp && result.created[0]) {
+    const alert = result.created[0]
+    session.notifications = [
+      {
+        id: `notice_${alert.id}`,
+        alertId: alert.id,
+        title: alert.type === 'missing-item' ? `${alert.evidence.itemName} not detected` : `${alert.evidence.itemName} is uncertain`,
+        body: alert.evidence.summary,
+      },
+      ...session.notifications,
+    ]
+    pushTrace(session, 'notification-emitted', 'In-app notification emitted.')
+  }
+}
+
+export function openBag(session: DemoSession): DemoSession {
+  const next = { ...session, bagIsOpen: true, lastBagOpenedAt: session.now }
+  pushTrace(next, 'bag-opened', 'Bag opened. Previous evidence is no longer fresh.')
+  recompute(next)
+  return next
+}
+
+export function closeBagAndScan(session: DemoSession): DemoSession {
+  if (session.sensorStatus === 'disconnected') return session
+  const next = { ...session, bagIsOpen: false }
+  next.scanSequence += 1
+  const id = scanId(session.now, next.scanSequence)
+  const running: Scan = {
+    id,
+    startedAt: session.now,
+    bagState: 'closed',
+    status: 'running',
+    source: 'simulated-rfid',
+  }
+  next.scans = [...next.scans, running]
+  pushTrace(next, 'scan-started', 'Reading closed-bag snapshot.')
+
+  if (next.failNextScan) {
+    const failed: Scan = { ...running, status: 'failed', completedAt: session.now, error: 'Simulated scan failure.' }
+    next.scans = next.scans.map((scan) => (scan.id === id ? failed : scan))
+    next.failNextScan = false
+    pushTrace(next, 'scan-failed', 'Scan failed. Inventory truth was not updated from this attempt.')
+    recompute(next)
+    return next
+  }
+
+  const completed: Scan = {
+    ...running,
+    status: 'completed',
+    completedAt: session.now,
+    readsEvaluated: 8,
+  }
+  next.scans = next.scans.map((scan) => (scan.id === id ? completed : scan))
+  const observations = simulateClosedBagScan({
+    scan: completed,
+    items: next.items,
+    tags: next.tags,
+    now: next.now,
+  })
+  next.observations = [...next.observations, ...observations]
+  pushTrace(next, 'scan-completed', `Closed-bag scan recorded ${observations.length} tag observations.`)
+  recompute(next)
+  return next
+}
+
+export function setItemPresent(session: DemoSession, itemId: string, present: boolean): DemoSession {
+  const next = {
+    ...session,
+    tags: {
+      ...session.tags,
+      [itemId]: { ...session.tags[itemId], present },
+    },
+  }
+  return next
+}
+
+export function setItemQuality(session: DemoSession, itemId: string, quality: ReadQuality): DemoSession {
+  return {
+    ...session,
+    tags: {
+      ...session.tags,
+      [itemId]: { ...session.tags[itemId], quality },
+    },
+  }
+}
+
+export function setItemLocationHint(session: DemoSession, itemId: string, locationHint: SimulatedTagConfig['locationHint']): DemoSession {
+  return {
+    ...session,
+    tags: {
+      ...session.tags,
+      [itemId]: { ...session.tags[itemId], locationHint },
+    },
+  }
+}
+
+export function armFailedScan(session: DemoSession): DemoSession {
+  return { ...session, failNextScan: true }
+}
+
+export function disconnectReader(session: DemoSession): DemoSession {
+  const next = { ...session, sensorStatus: 'disconnected' as const }
+  pushTrace(next, 'reader-disconnected', 'Simulated reader disconnected.')
+  recompute(next)
+  return next
+}
+
+export function reconnectReader(session: DemoSession): DemoSession {
+  const next = { ...session, sensorStatus: 'connected' as const }
+  pushTrace(next, 'reader-reconnected', 'Simulated reader reconnected.')
+  recompute(next)
+  return next
+}
+
+export function resetDemo(): DemoSession {
+  const session = createDemoSession()
+  session.trace = session.trace.filter((event) => event.name === 'demo-initialized' || event.name === 'activity-loaded' || event.name === 'travel-estimate-loaded')
+  pushTrace(session, 'demo-reset', 'Demonstration restored to the canonical Calculus II scenario.')
+  return session
+}
+
+export function applySuggestionDecision(
+  session: DemoSession,
+  itemId: string,
+  decision: 'approved' | 'rejected',
+  bucket: 'required' | 'optional' | 'excluded',
+): DemoSession {
+  if (session.suggestionDecisions[itemId]) return session
+  const next = {
+    ...session,
+    suggestionDecisions: { ...session.suggestionDecisions, [itemId]: decision },
+  }
+  pushTrace(next, decision === 'approved' ? 'suggestion-approved' : 'suggestion-rejected', `${itemId} ${decision}.`)
+  if (decision !== 'approved') return next
+
+  const required = new Set(next.activity.requiredItemIds)
+  const optional = new Set(next.activity.optionalItemIds)
+  if (bucket === 'required') {
+    required.add(itemId)
+    optional.delete(itemId)
+  } else if (bucket === 'optional') {
+    optional.add(itemId)
+    required.delete(itemId)
+  } else {
+    required.delete(itemId)
+    optional.delete(itemId)
+  }
+  next.activity = {
+    ...next.activity,
+    requiredItemIds: [...required],
+    optionalItemIds: [...optional],
+  }
+  recompute(next)
+  return next
+}
+
+export function setSuggestions(session: DemoSession, suggestions: CarryProfileResult, sourceLabel: string): DemoSession {
+  const next = { ...session, suggestions, suggestionDecisions: {} }
+  pushTrace(next, 'model-inference-requested', 'Carry-profile inference requested.')
+  pushTrace(
+    next,
+    suggestions.source === 'fallback' ? 'fallback-selected' : 'model-output-validated',
+    sourceLabel,
+  )
+  return next
+}
+
+export function acknowledge(session: DemoSession, alertId: string): DemoSession {
+  return { ...session, alerts: acknowledgeAlert(session.alerts, alertId, session.now) }
+}
+
+export function suppress(session: DemoSession, alertId: string): DemoSession {
+  return { ...session, alerts: suppressAlert(session.alerts, alertId, session.now) }
+}
+
+export function expectedLeaveBy(): string {
+  return calculateLeaveBy(ACTIVITIES[0].startTime, 18, 7)
+}

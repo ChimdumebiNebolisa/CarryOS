@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 2,
+  "artifactId": "site-home",
+  "engineVersion": "4.0.0",
+  "engineRevision": "sha256:b4c9fe60d350f02774133d8b9958160f4fa8b277c9a4168cb6a5826a369d1f86",
+  "distributionIntegrity": "verified",
+  "selection": {
+    "agent": "codex",
+    "grammar": "reference:carry-hero",
+    "grammarSource": "project:.styleseed/rulesets/carry-hero/RULESET.md",
+    "referenceContract": "reference-contract-v2",
+    "fallback": "expressive-marketing",
+    "adapter": "product-ui",
+    "domain": "education",
+    "page": "landing",
+    "recipe": "expressive-brand",
+    "recipeSelection": "expressive-brand",
+    "palette": "quiet-mineral",
+    "paletteSelection": "quiet-mineral",
+    "paletteGeneration": {
+      "keyColor": "#2F6F4E",
+      "mode": "light",
+      "character": "deep",
+      "harmony": "tonal",
+      "temperature": "warm"
+    },
+    "profile": "none"
+  },
+  "inputs": [
+    {
+      "id": "project",
+      "path": ".styleseed/project.json",
+      "sha256": "sha256:72797fb91034b8c588a9ff618902923ef0c0607f538f18d0b2048f0cb6005cf5",
+      "bytes": 747
+    },
+    {
+      "id": "artifact",
+      "path": ".styleseed/artifacts/site-home.json",
+      "sha256": "sha256:fde2f8533fb1bf3feb60ded7ae494204ff63ecf681c51471f6f808d78e4ee2b1",
+      "bytes": 1718
+    }
+  ],
+  "sources": [
+    {
+      "id": "agent-execution",
+      "path": "catalog:agents",
+      "sha256": "sha256:dfe4b0a2de36209ca50a04b39e35c248ac13fb8b059428fdb68a484cffc190cb",
+      "bytes": 329
+    },
+    {
+      "id": "core",
+      "path": "catalog:core",
+      "sha256": "sha256:6002465c13e879fb190387117049eb4484a3ce908c9f8af1648882c870194266",
+      "bytes": 5394
+    },
+    {
+      "id": "grammar",
+      "path": "project:.styleseed/rulesets/carry-hero/RULESET.md",
+      "sha256": "sha256:2b8fcf4f79e1f66fc95c5662db27fdd0e407bd3b457b1044bd4e2299b1205fdb",
+      "bytes": 1993
+    },
+    {
+      "id": "adapter",
+      "path": "catalog:adapters/product-ui",
+      "sha256": "sha256:7b5b5c34b0b235dca329e6384ccb94c66ee65a348bbe7142277ae7bbda3c13b0",
+      "bytes": 714
+    },
+    {
+      "id": "domain",
+      "path": "catalog:domains/education",
+      "sha256": "sha256:8192f7a04edd7ea2466685e4418cbbde7913f77bd7237f78ac4fcd11436bd8a4",
+      "bytes": 951
+    },
+    {
+      "id": "page",
+      "path": "catalog:pages/landing",
+      "sha256": "sha256:2875da6524db84e956d4a79c460eafec11cf44836b2d13936f11af2679853a81",
+      "bytes": 1685
+    },
+    {
+      "id": "recipe",
+      "path": "catalog:recipes/expressive-brand",
+      "sha256": "sha256:3b5a536c7127554a106219c26d39c502f53eea1fefe87b7d350a03a0af7c171a",
+      "bytes": 1924
+    },
+    {
+      "id": "palette",
+      "path": "catalog:palettes/quiet-mineral",
+      "sha256": "sha256:70d7ba83916f9c624950b65ab7370977a9d78dc0b694e34354f625b36ad5dc7e",
+      "bytes": 2189
+    },
+    {
+      "id": "craft",
+      "path": "catalog:craft",
+      "sha256": "sha256:9f8b9c38d3ec1dc6d476a149b7c3502b27c51cbb55bce397a696b44335a22d21",
+      "bytes": 3564
+    },
+    {
+      "id": "reference:RULESET.md",
+      "path": ".styleseed/rulesets/carry-hero/RULESET.md",
+      "sha256": "sha256:69e5799260f774e569576a95f04b72c88cbe516a72ca6a21fa6195e4f6b7074f",
+      "bytes": 648
+    },
+    {
+      "id": "reference:tokens.json",
+      "path": ".styleseed/rulesets/carry-hero/tokens.json",
+      "sha256": "sha256:727ebf9922ed2433d8910f76f7a52b575cde4d94dd189ac1cb44eb3ed006a303",
+      "bytes": 333
+    },
+    {
+      "id": "reference:evidence.json",
+      "path": ".styleseed/rulesets/carry-hero/evidence.json",
+      "sha256": "sha256:114be3834b8274de276d7dd1307ab2c85a1d837c1c9235c79f78bbc6d445c85a",
+      "bytes": 399
+    },
+    {
+      "id": "reference:checks.md",
+      "path": ".styleseed/rulesets/carry-hero/checks.md",
+      "sha256": "sha256:518c6eade246c20175b12b70b3c86b9bb0f616d76ce43ad8b622c57edbbc5032",
+      "bytes": 357
+    },
+    {
+      "id": "reference:reference-board.html",
+      "path": ".styleseed/rulesets/carry-hero/reference-board.html",
+      "sha256": "sha256:6b2dd6055ddf26702ae758c464028a8c80c570feaa4f0e45fb5a7edfe2720363",
+      "bytes": 199
+    },
+    {
+      "id": "reference:adapter.json",
+      "path": ".styleseed/rulesets/carry-hero/adapter.json",
+      "sha256": "sha256:4bb8e05f7210a8fc41066ab502f7449ffbe66282377c037e0457322673d57576",
+      "bytes": 144
+    }
+  ],
+  "methodHash": "sha256:f59e83858add0bb3f17f776850527f2939a346002d42e6f0858b6e3df7ff1cc6",
+  "validationHash": "sha256:d43f30baebfa62a3441ef25b313aa32f51120de416d37a165377623539afb906",
+  "validationSlices": {
+    "target": "sha256:fd89b3b7c61fa08e9a1055ecd5c5678651b23752e9a5d07d80a2fb7f5ac1ae14",
+    "implementation": "sha256:e6594bb01b72e01cd9d47009c88c7568b5896f6a04aa5522e9a06fa04a34d997",
+    "scoreFloor": "sha256:48449a14a4ff7d79bb7a1b6f3d488eba397c36ef25634c111b49baf362511afc",
+    "requiredRenders": "sha256:395fd8679a2efbe792ec8bab8b960745348a123851b6b5ca4abff4eec7c57433",
+    "temporal": "sha256:44493b3e1cb087680c534ea567be974e7a8de8d6b95d5d895a1f58e404290692",
+    "humanAcceptance": "sha256:b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+  },
+  "bundle": {
+    "kind": "bundle",
+    "path": ".styleseed/bundles/site-home.md",
+    "sha256": "sha256:bfdac9610c8b43307a831e9d4e3c4cee6c4e22e774fae3a72fc04318b7257484",
+    "bytes": 19652
+  },
+  "outputs": [
+    {
+      "kind": "bundle",
+      "path": ".styleseed/bundles/site-home.md",
+      "sha256": "sha256:bfdac9610c8b43307a831e9d4e3c4cee6c4e22e774fae3a72fc04318b7257484",
+      "bytes": 19652
+    },
+    {
+      "kind": "palette-json",
+      "path": ".styleseed/palettes/site-home.json",
+      "sha256": "sha256:e86ab06f999bbd104dddb387db1b56e4b44c7ffebc3015d5bf98ea58e28e3193",
+      "bytes": 5899
+    },
+    {
+      "kind": "palette-css",
+      "path": ".styleseed/palettes/site-home.css",
+      "sha256": "sha256:2ae035e500675681648ae0a55c5e5b0af4469757fc28085d75b63d24fb9fa911",
+      "bytes": 1157
+    }
+  ]
+}

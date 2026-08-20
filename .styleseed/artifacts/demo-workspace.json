@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "demo-workspace",
+  "target": {
+    "kind": "route",
+    "locator": "/demo"
+  },
+  "selection": {
+    "grammar": "reference:carry-hero",
+    "adapter": "product-ui",
+    "domain": "education",
+    "page": "dashboard",
+    "recipe": "enterprise-workbench",
+    "palette": "quiet-mineral",
+    "profile": "none",
+    "fallback": "operations-console"
+  },
+  "decisions": {
+    "primaryDecision": "Product workspace must keep evidence and AI decision boundaries legible together.",
+    "primaryAction": "Render deterministic inventory and alert states without adding fake behavior.",
+    "signatureMove": "Keep the real scanner interaction at the center of the dashboard proof."
+  },
+  "implementation": {
+    "sourceRoots": [
+      "src/app/demo/page.tsx",
+      "src/components/demo/DemoWorkspace.tsx",
+      "src/domain",
+      "src/application"
+    ],
+    "tokenFiles": [
+      "src/app/globals.css"
+    ]
+  },
+  "validation": {
+    "scoreFloor": 80,
+    "requiredRenders": [
+      {
+        "id": "desktop-loaded",
+        "state": "loaded",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        }
+      },
+      {
+        "id": "mobile-loaded",
+        "state": "loaded",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        }
+      },
+      {
+        "id": "mobile-reduced-motion",
+        "state": "reduced-motion",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        }
+      }
+    ],
+    "temporal": {
+      "required": true,
+      "scenarios": [
+        "dashboard-motion",
+        "dashboard-reduced-motion"
+      ]
+    },
+    "humanAcceptance": true
+  }
+}

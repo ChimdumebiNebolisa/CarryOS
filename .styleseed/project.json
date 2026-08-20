@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "projectId": "carryos-next",
+  "defaults": {
+    "agent": "codex",
+    "domain": "education",
+    "adapter": "product-ui",
+    "recipe": "expressive-brand",
+    "palette": "quiet-mineral",
+    "profile": "none",
+    "fallback": "expressive-marketing"
+  },
+  "brand": {
+    "keyColor": "#2F6F4E",
+    "paletteCharacter": "deep",
+    "paletteMode": "light",
+    "paletteHarmony": "tonal",
+    "surfaceTemperature": "warm",
+    "fontFamilies": [
+      "Space Grotesk",
+      "DM Sans",
+      "DM Mono"
+    ],
+    "radius": "soft",
+    "elevation": "restrained-shadow",
+    "density": "comfortable",
+    "motion": {
+      "seed": "spring",
+      "intensity": "restrained"
+    },
+    "imageryRole": "product-proof-first"
+  }
+}

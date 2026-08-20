@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "site-home",
+  "target": {
+    "kind": "route",
+    "locator": "/"
+  },
+  "selection": {
+    "grammar": "reference:carry-hero",
+    "adapter": "product-ui",
+    "domain": "education",
+    "page": "landing",
+    "recipe": "expressive-brand",
+    "palette": "quiet-mineral",
+    "profile": "none",
+    "fallback": "expressive-marketing"
+  },
+  "decisions": {
+    "primaryDecision": "Primary proof should read in 10 seconds and communicate readiness clearly.",
+    "primaryAction": "Use the carry orbit visual and deterministic scan state to establish trust.",
+    "signatureMove": "Show missing-calculator state as the key readiness moment on landing."
+  },
+  "implementation": {
+    "sourceRoots": [
+      "src/app/page.tsx",
+      "src/app/globals.css",
+      "src/components/marketing/Hero.tsx",
+      "src/components/marketing/WorkingProof.tsx",
+      "src/components/marketing/CarryStateStack.tsx"
+    ],
+    "tokenFiles": [
+      "src/app/globals.css"
+    ]
+  },
+  "validation": {
+    "scoreFloor": 80,
+    "requiredRenders": [
+      {
+        "id": "desktop-loaded",
+        "state": "loaded",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        }
+      },
+      {
+        "id": "mobile-loaded",
+        "state": "loaded",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        }
+      },
+      {
+        "id": "mobile-reduced-motion",
+        "state": "reduced-motion",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        }
+      }
+    ],
+    "temporal": {
+      "required": true,
+      "scenarios": [
+        "hero-motion",
+        "hero-reduced-motion"
+      ]
+    },
+    "humanAcceptance": true
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "artifacts": [
+    {
+      "id": "site-home",
+      "config": "site-home.json"
+    },
+    {
+      "id": "demo-workspace",
+      "config": "demo-workspace.json"
+    }
+  ]
+}

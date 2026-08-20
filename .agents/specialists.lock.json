@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "project": "CarryOS-next",
+  "bootstrapMode": "BUILD",
+  "bootstrapDepth": "FULL",
+  "verificationDate": "2026-08-17",
+  "sourceEnvironmentLock": "C:\\Users\\Chimdumebi\\.agents\\mitch-bootstrap-specialists.lock.json",
+  "overallStatus": "VERIFIED",
+  "notes": "BUILD mode uses already-verified user-level specialists. No specialist was installed or upgraded during this session. screenshot-to-design-system is recorded as available but not selected by default.",
+  "specialists": [
+    {
+      "canonicalName": "GitHub Spec Kit",
+      "selected": true,
+      "status": "AVAILABLE",
+      "repository": "https://github.com/github/spec-kit",
+      "sourcePath": "templates/commands",
+      "revision": "bf88c9f9a82fa370c7a7257aa2b3cf10b457b65c",
+      "installationScope": "user-level",
+      "installationPaths": [
+        "C:\\Users\\Chimdumebi\\.agents\\skills\\speckit-*",
+        "C:\\Users\\Chimdumebi\\.codex\\skills\\speckit-*"
+      ],
+      "engineRevision": "specify-cli 0.16.5.dev0",
+      "verificationStatus": "VERIFIED"
+    },
+    {
+      "canonicalName": "Anthropic frontend-design",
+      "selected": true,
+      "status": "AVAILABLE",
+      "repository": "https://github.com/anthropics/skills",
+      "sourcePath": "skills/frontend-design",
+      "revision": "f6656c1256d5a8adfa37db9110046ef20bac644c",
+      "installationScope": "user-level",
+      "installationPaths": [
+        "C:\\Users\\Chimdumebi\\.agents\\skills\\frontend-design",
+        "C:\\Users\\Chimdumebi\\.codex\\skills\\frontend-design"
+      ],
+      "engineRevision": null,
+      "verificationStatus": "VERIFIED"
+    },
+    {
+      "canonicalName": "StyleSeed",
+      "selected": true,
+      "status": "AVAILABLE",
+      "repository": "https://github.com/bitjaru/styleseed",
+      "sourcePath": "skills",
+      "revision": "2c4cd2453f08af023658d99d65a5de0d5de06b8b",
+      "installationScope": "user-level",
+      "installationPaths": [
+        "C:\\Users\\Chimdumebi\\.agents\\skills\\ss-*",
+        "C:\\Users\\Chimdumebi\\.codex\\skills\\ss-*"
+      ],
+      "engineRevision": {
+        "version": "4.0.0",
+        "revision": "sha256:b4c9fe60d350f02774133d8b9958160f4fa8b277c9a4168cb6a5826a369d1f86"
+      },
+      "verificationStatus": "VERIFIED"
+    },
+    {
+      "canonicalName": "Vibe Security",
+      "selected": true,
+      "status": "AVAILABLE",
+      "repository": "https://github.com/raroque/vibe-security-skill",
+      "sourcePath": "vibe-security",
+      "revision": "850938f20f6915e7c3688d85c0a838f7909c87bb",
+      "installationScope": "user-level",
+      "installationPaths": [
+        "C:\\Users\\Chimdumebi\\.agents\\skills\\vibe-security",
+        "C:\\Users\\Chimdumebi\\.codex\\skills\\vibe-security"
+      ],
+      "engineRevision": "skill metadata 1.0",
+      "verificationStatus": "VERIFIED"
+    },
+    {
+      "canonicalName": "Code Review Expert",
+      "selected": true,
+      "status": "AVAILABLE",
+      "repository": "https://github.com/sanyuan0704/sanyuan-skills",
+      "sourcePath": "skills/code-review-expert",
+      "revision": "08b6572ef108f22d4e8a3ecf9182a4bbef097744",
+      "installationScope": "user-level",
+      "installationPaths": [
+        "C:\\Users\\Chimdumebi\\.agents\\skills\\code-review-expert",
+        "C:\\Users\\Chimdumebi\\.codex\\skills\\code-review-expert"
+      ],
+      "engineRevision": null,
+      "verificationStatus": "VERIFIED"
+    },
+    {
+      "canonicalName": "screenshot-to-design-system",
+      "selected": false,
+      "status": "AVAILABLE_NOT_SELECTED",
+      "repository": "https://github.com/WCF900905/screenshot-to-design-system",
+      "sourcePath": ".",
+      "revision": "030e3007a82991113a04b9e0454824b4ad2ef9c7",
+      "installationScope": "user-level",
+      "installationPaths": [
+        "C:\\Users\\Chimdumebi\\.agents\\skills\\screenshot-to-design-system",
+        "C:\\Users\\Chimdumebi\\.codex\\skills\\screenshot-to-design-system"
+      ],
+      "engineRevision": "skill metadata 1.1.0",
+      "verificationStatus": "VERIFIED",
+      "selectionNote": "Use only if StyleSeed cannot resolve a specific reusable control or token question."
+    }
+  ]
+}

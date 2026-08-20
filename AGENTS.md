@@ -1,35 +1,59 @@
 # Carry repository instructions
 
-## Purpose and stack
+Carry is a software-first, single-user backpack inventory prototype. It connects upcoming event context, user-approved item requirements, simulated RFID observations, uncertainty-aware inventory memory, and departure timing into proactive, evidence-backed intervention.
 
-Carry is a software-first, single-user backpack inventory prototype. It is a Vite + React + TypeScript SPA with deterministic in-memory state; there is no backend or persistence layer.
+## Stack
 
-## Structure
+Next.js App Router, React, TypeScript strict mode, Tailwind CSS v4, selective shadcn/ui primitives, Motion for React, Lucide React, Zod, Vitest, Playwright.
 
-- `src/domain.ts` owns shared types, inventory-state evaluation, readiness, leave-by calculation, and alert policy.
-- `src/simulator.ts` owns the `InventorySensor` contract implementation used by the UI. Keep future hardware behind this boundary.
-- `src/travel.ts` owns the travel provider boundary; the MVP provider is simulated.
-- `src/demoData.ts` owns seeded items, activities, and reproducible demo defaults.
-- `src/App.tsx` and `src/styles.css` own the dashboard and interaction shell.
-- `src/domain.test.ts` covers deterministic domain and simulator behavior.
+## Important directories
+
+- `src/domain/` deterministic inventory, readiness, alerts, timing, carry-profile validation
+- `src/application/` demo scenario, notifications, trace
+- `src/adapters/` simulated RFID, simulated travel, model provider, rate limiter
+- `src/app/` routes and the carry-profile Route Handler
+- `src/components/marketing/` landing page
+- `src/components/demo/` full demo workspace
+- `tests/` unit, integration, and e2e
 
 ## Commands
 
-- `npm run dev` — local development.
-- `npm run build` — TypeScript check and production build.
-- `npm test` — Vitest tests.
-- `npm run preview` — local production preview.
+- `npm run dev`
+- `npm run build`
+- `npm run start`
+- `npm run lint`
+- `npm run typecheck`
+- `npm test`
+- `npm run test:e2e`
+
+## Environment
+
+Server-only: `OPENAI_API_KEY`, `OPENAI_MODEL`, optional `OPENAI_BASE_URL`.
+Public: `NEXT_PUBLIC_GITHUB_REPOSITORY_URL`.
+Never put secrets on `NEXT_PUBLIC_`.
 
 ## Invariants
 
-- Keep inventory states, leave-by calculation, requirements, alert creation/deduplication/resolution, and scan validity deterministic; do not make them dependent on an LLM.
-- A failed or unavailable scan must not produce Ready; use Unknown or Sensor unavailable instead.
-- Simulated observations must remain visibly labeled as simulated. Do not claim physical RFID validation.
-- Do not add secrets, real credentials, private endpoints, calendar access, maps access, or production push-notification configuration.
-- Preserve the seeded Calculus II forgotten-calculator flow and its fixed demo clock unless tests and documentation are updated together.
-- When changing a state transition or alert rule, update focused tests in `src/domain.test.ts` before considering the change complete.
-- Keep accessibility basics intact: semantic buttons/labels, readable contrast, keyboard-reachable controls, and responsive behavior.
+- Domain functions must not call `Date.now()`, `Math.random()`, React, or network APIs.
+- Failed, stale, unknown, or incomplete evidence cannot produce Ready.
+- AI output is untrusted. Validate it, require approval, and never let it mutate sensor state or readiness.
+- Simulated RFID must remain labeled as simulated.
+- Hero, landing proof, and `/demo` must use the same domain engine.
+- Browser notification permission is requested only after an explicit user action.
 
-## Scope boundary
+## Specialist activation
 
-The current submission scope is one backpack, one simulated reader, eight registered items, three activities, uncertainty-aware memory, simulated travel, evidence-backed alerts, resolution, tests, and hardware planning. Persistence, multiple users, calendar/maps integrations, AI, native apps, and hardware validation are future work.
+- `frontend-design`: substantial new visual direction.
+- StyleSeed: respect `STYLESEED.md` for substantial visual work.
+- Vibe Security: consult before changing the AI endpoint, secrets, validation, or rate limits.
+- Code Review Expert: review-only; the implementing agent applies required fixes.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes: APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev`: verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
