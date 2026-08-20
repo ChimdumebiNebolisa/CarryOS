@@ -1,11 +1,20 @@
+import { ArrowRight, Check, LockKeyhole, Sparkles } from 'lucide-react'
+
 export function AiBoundary() {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
-      <p className="mono text-xs uppercase tracking-[0.18em] text-[var(--graphite)]">05 / Explanation and AI boundary</p>
-      <h2 className="mt-3 max-w-3xl text-5xl leading-[0.92] sm:text-6xl">The model may suggest. You approve. Evidence decides.</h2>
-      <p className="mt-4 max-w-2xl text-[var(--ink-soft)]">
-        Carry asks one question of the model: which registered items this event may require. The model cannot mark an item present, invent travel time, or make the bag Ready.
-      </p>
+    <section id="technology" className="landing-section landing-ai-boundary">
+      <div className="landing-ai-heading">
+        <p className="landing-eyebrow">Context and AI boundary</p>
+        <h2>Useful suggestions. A clear boundary.</h2>
+        <p>Carry can ask a model for a starting checklist. It cannot mark an item present, invent travel time, or make the bag ready.</p>
+      </div>
+      <div className="landing-ai-sequence" aria-label="AI boundary sequence">
+        <div className="landing-ai-step"><Sparkles size={18} aria-hidden="true" /><strong>The model suggests</strong><span>Registered items only</span></div>
+        <ArrowRight className="landing-ai-arrow" size={20} aria-hidden="true" />
+        <div className="landing-ai-step"><Check size={18} aria-hidden="true" /><strong>Carry checks</strong><span>Schema and profile rules</span></div>
+        <ArrowRight className="landing-ai-arrow" size={20} aria-hidden="true" />
+        <div className="landing-ai-step"><LockKeyhole size={18} aria-hidden="true" /><strong>You decide</strong><span>Approval is explicit</span></div>
+      </div>
     </section>
   )
 }

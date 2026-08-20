@@ -1,5 +1,6 @@
 import { observationId } from '@/lib/ids'
 import type { Item, Scan, TagObservation, LocationHint } from '@/domain/types'
+import { DEMO_PRESENT_ITEM_IDS } from '@/fixtures/demo-scenario'
 
 export type ReadQuality = 'strong' | 'weak' | 'intermittent'
 
@@ -45,4 +46,4 @@ export function simulateClosedBagScan(input: SimulatedScanInput): TagObservation
   })
 }
 
-export const DEFAULT_PRESENT_ITEM_IDS = ['laptop', 'notebook', 'student-id'] as const
+export const DEFAULT_PRESENT_ITEM_IDS = DEMO_PRESENT_ITEM_IDS

@@ -7,9 +7,11 @@ import { calculateLeaveBy } from '@/domain/timing'
 import { createTraceEvent, redactTraceDetail } from '@/application/trace'
 import { shouldNotify } from '@/application/notification-policy'
 import { scanId } from '@/lib/ids'
-import { DEMO_NOW, type Activity, type Alert, type CarryProfileResult, type InventoryState, type Item, type Readiness, type Scan, type SensorStatus, type TagObservation, type TraceEvent, type TravelEstimate } from '@/domain/types'
+import { type Activity, type Alert, type CarryProfileResult, type InventoryState, type Item, type Readiness, type Scan, type SensorStatus, type TagObservation, type TraceEvent, type TravelEstimate } from '@/domain/types'
 import { ACTIVITIES } from '@/fixtures/activities'
 import { ITEMS } from '@/fixtures/items'
+import { DEMO_SESSION_NOW } from '@/fixtures/demo-scenario'
+import { formatClock } from '@/lib/utils'
 
 export interface InAppNotification {
   id: string
@@ -64,7 +66,7 @@ function cloneActivity(activity: Activity): Activity {
   }
 }
 
-export function createDemoSession(now = DEMO_NOW): DemoSession {
+export function createDemoSession(now = DEMO_SESSION_NOW): DemoSession {
   const activity = cloneActivity(ACTIVITIES[0])
   const session: DemoSession = {
     now,
@@ -96,10 +98,10 @@ export function createDemoSession(now = DEMO_NOW): DemoSession {
   }
   const travel = estimateTravel(activity)
   if (travel.ok) session.travel = travel.estimate
-  pushTrace(session, 'demo-initialized', 'Canonical Calculus II demonstration loaded.')
-  pushTrace(session, 'activity-loaded', `${activity.name} starts at 9:00 AM.`)
+  pushTrace(session, 'demo-initialized', `Canonical ${activity.name} demonstration loaded.`)
+  pushTrace(session, 'activity-loaded', `${activity.name} starts at ${formatClock(activity.startTime)}.`)
   if (travel.ok) {
-    pushTrace(session, 'travel-estimate-loaded', `Simulated travel 18 minutes. Leave by 8:35 AM.`)
+    pushTrace(session, 'travel-estimate-loaded', `Simulated travel ${travel.estimate.durationMinutes} minutes. Leave by ${formatClock(travel.estimate.leaveBy)}.`)
   }
   session.inventory = evaluateInventory(session.items, session.scans, session.observations, {
     now: session.now,
@@ -196,7 +198,7 @@ export function closeBagAndScan(session: DemoSession): DemoSession {
     ...running,
     status: 'completed',
     completedAt: session.now,
-    readsEvaluated: 8,
+    readsEvaluated: next.items.length,
   }
   next.scans = next.scans.map((scan) => (scan.id === id ? completed : scan))
   const observations = simulateClosedBagScan({
@@ -263,7 +265,7 @@ export function reconnectReader(session: DemoSession): DemoSession {
 export function resetDemo(): DemoSession {
   const session = createDemoSession()
   session.trace = session.trace.filter((event) => event.name === 'demo-initialized' || event.name === 'activity-loaded' || event.name === 'travel-estimate-loaded')
-  pushTrace(session, 'demo-reset', 'Demonstration restored to the canonical Calculus II scenario.')
+  pushTrace(session, 'demo-reset', 'Demonstration restored to the canonical Algorithms scenario.')
   return session
 }
 

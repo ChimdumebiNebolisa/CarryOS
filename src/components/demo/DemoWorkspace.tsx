@@ -46,18 +46,18 @@ export function DemoWorkspace() {
 
   async function requestProfile() {
     setAiBusy(true)
-    setAiStatus('Generating suggestions…')
+    setAiStatus('Generating suggestions...')
     try {
       const response = await fetch('/api/carry-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event: {
-            name: 'Calculus II exam',
-            type: 'exam-lab',
-            description: 'Closed-book exam. Non-graphing calculators are allowed.',
-            location: 'Science Building',
-            explicitInstructions: 'Bring student ID.',
+            name: session.activity.name,
+            type: session.activity.type,
+            description: session.activity.destination.description ?? session.activity.name,
+            location: session.activity.destination.name,
+            explicitInstructions: 'Bring the approved requirements for this activity.',
           },
           registeredItems: session.items.map((item) => ({
             itemId: item.id,
@@ -162,11 +162,11 @@ function ActivityPanel({ session }: { session: DemoSession }) {
   return (
     <section className="rounded-3xl border border-black/8 bg-[var(--paper-strong)] p-5">
       <h1 className="text-3xl">{session.activity.name}</h1>
-      <p className="mt-2 text-sm text-[var(--graphite)]">Demonstration clock 8:21 AM · not live time</p>
+      <p className="mt-2 text-sm text-[var(--graphite)]">Demonstration clock {formatClock(session.now)} / not live time</p>
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
         <div>
           <dt className="mono text-[11px] uppercase tracking-[0.16em] text-[var(--graphite)]">Start</dt>
-          <dd>9:00 AM</dd>
+          <dd>{formatClock(session.activity.startTime)}</dd>
         </div>
         <div>
           <dt className="mono text-[11px] uppercase tracking-[0.16em] text-[var(--graphite)]">Destination</dt>
@@ -230,20 +230,20 @@ function SensorLab({
         <Button
           type="button"
           variant="ghost"
-          data-testid="add-calculator"
+          data-testid="add-notebook"
           onClick={() =>
-            onChange((current) => setItemPresent(current.bagIsOpen ? current : openBag(current), 'calculator', true))
+            onChange((current) => setItemPresent(current.bagIsOpen ? current : openBag(current), 'notebook', true))
           }
         >
-          Add calculator
+          Add notebook
         </Button>
-        <Button type="button" variant="ghost" onClick={() => onChange((current) => setItemPresent(current, 'calculator', false))}>
-          Remove calculator
+        <Button type="button" variant="ghost" onClick={() => onChange((current) => setItemPresent(current, 'notebook', false))}>
+          Remove notebook
         </Button>
-        <Button type="button" variant="ghost" onClick={() => onChange((current) => setItemQuality(current, 'calculator', 'weak'))}>
-          Weak calculator read
+        <Button type="button" variant="ghost" onClick={() => onChange((current) => setItemQuality(current, 'notebook', 'weak'))}>
+          Weak notebook read
         </Button>
-        <Button type="button" variant="ghost" onClick={() => onChange((current) => setItemLocationHint(current, 'calculator', 'outside'))}>
+        <Button type="button" variant="ghost" onClick={() => onChange((current) => setItemLocationHint(current, 'notebook', 'outside'))}>
           Outside-bag test
         </Button>
         <Button type="button" variant="warning" data-testid="arm-fail" onClick={() => onChange(armFailedScan)}>
@@ -325,7 +325,7 @@ function CarryProfilePanel({
       <h2 className="text-2xl">AI carry profile</h2>
       <p className="mt-2 text-sm text-[var(--graphite)]">Suggestions do not change readiness until you approve a registered item.</p>
       <Button className="mt-4" type="button" data-testid="generate-profile" onClick={onRequest} disabled={busy}>
-        {busy ? 'Generating…' : 'Generate profile'}
+        {busy ? 'Generating...' : 'Generate profile'}
       </Button>
       <p className="mt-3 text-sm" aria-live="polite" data-testid="ai-status">{status}</p>
       {suggestions ? (

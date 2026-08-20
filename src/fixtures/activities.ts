@@ -1,21 +1,22 @@
 import type { Activity } from '@/domain/types'
+import { DEMO_REQUIRED_ITEM_IDS } from '@/fixtures/demo-scenario'
 
 const DAY = '2026-08-05'
 
 export const ACTIVITIES: Activity[] = [
   {
-    id: 'calculus-ii',
-    name: 'Calculus II',
+    id: 'algorithms',
+    name: 'Algorithms',
     type: 'class',
-    startTime: `${DAY}T09:00:00-05:00`,
+    startTime: `${DAY}T10:00:00-05:00`,
     destination: {
-      name: 'Science Building',
-      description: 'Room 214 · North campus',
+      name: 'Lecture Hall 28',
+      description: 'CSCI 340: Algorithms',
     },
     travelMinutes: 18,
     departureBufferMinutes: 7,
-    requiredItemIds: ['laptop', 'notebook', 'calculator', 'student-id'],
-    optionalItemIds: ['headphones', 'water-bottle'],
+    requiredItemIds: [...DEMO_REQUIRED_ITEM_IDS],
+    optionalItemIds: ['headphones', 'student-id'],
     status: 'upcoming',
   },
   {
@@ -25,7 +26,7 @@ export const ACTIVITIES: Activity[] = [
     startTime: `${DAY}T13:30:00-05:00`,
     destination: {
       name: 'Engineering Lab',
-      description: 'Lab 3 · West campus',
+      description: 'Lab 3: West campus',
     },
     travelMinutes: 24,
     departureBufferMinutes: 10,
@@ -40,7 +41,7 @@ export const ACTIVITIES: Activity[] = [
     startTime: `${DAY}T17:30:00-05:00`,
     destination: {
       name: 'Innovation Hub',
-      description: '4th floor · Downtown',
+      description: '4th floor: Downtown',
     },
     travelMinutes: 32,
     departureBufferMinutes: 12,

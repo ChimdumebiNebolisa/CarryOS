@@ -15,6 +15,7 @@ describe('hero states', () => {
 
   it('render authentic state copy', () => {
     render(<CarryStateStack />)
-    expect(screen.getByRole('button', { name: 'Scan required' })).toBeTruthy()
+    expect(screen.getByText('Inventory belief')).toBeTruthy()
+    expect(screen.getByText('1 item missing')).toBeTruthy()
   })
 })

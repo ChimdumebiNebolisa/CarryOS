@@ -1,5 +1,7 @@
 import { closeBagAndScan, createDemoSession, openBag, setItemPresent, type DemoSession } from '@/application/demo-scenario'
 import { ITEM_STATE_LABELS, type Readiness } from '@/domain/types'
+import { DEMO_MISSING_ITEM_ID } from '@/fixtures/demo-scenario'
+import { ITEMS } from '@/fixtures/items'
 
 export type HeroStateId = 'awaiting' | 'scanning' | 'missing' | 'ready'
 
@@ -18,7 +20,8 @@ export interface HeroSnapshot {
 }
 
 function snapshotFrom(session: DemoSession, id: HeroStateId, overlay?: Partial<HeroSnapshot>): HeroSnapshot {
-  const calculator = session.inventory.find((state) => state.itemId === 'calculator')
+  const trackedItem = session.inventory.find((state) => state.itemId === DEMO_MISSING_ITEM_ID)
+  const trackedItemName = ITEMS.find((item) => item.id === DEMO_MISSING_ITEM_ID)?.name ?? 'Required item'
   return {
     id,
     kicker: session.activity.name,
@@ -30,8 +33,8 @@ function snapshotFrom(session: DemoSession, id: HeroStateId, overlay?: Partial<H
     confirmed: session.readiness.confirmedRequiredCount,
     required: session.readiness.requiredCount,
     leaveBy: session.travel?.leaveBy,
-    itemLine: calculator
-      ? `Calculator ${ITEM_STATE_LABELS[calculator.status].toLowerCase()}`
+    itemLine: trackedItem
+      ? `${trackedItemName} ${ITEM_STATE_LABELS[trackedItem.status].toLowerCase()}`
       : 'No fresh closed-bag evidence',
     ...overlay,
   }
@@ -44,7 +47,7 @@ export function buildHeroSnapshots(): Record<HeroStateId, HeroSnapshot> {
   let ready = createDemoSession()
   ready = closeBagAndScan(ready)
   ready = openBag(ready)
-  ready = setItemPresent(ready, 'calculator', true)
+  ready = setItemPresent(ready, DEMO_MISSING_ITEM_ID, true)
   ready = closeBagAndScan(ready)
 
   return {
@@ -59,11 +62,11 @@ export function buildHeroSnapshots(): Record<HeroStateId, HeroSnapshot> {
       itemLine: 'No invented percentage',
     }),
     missing: snapshotFrom(missing, 'missing', {
-      title: 'Calculator not detected',
-      detail: `${missing.readiness.confirmedRequiredCount} of ${missing.readiness.requiredCount} required items confirmed. Leave by 8:35 AM.`,
+      title: `${ITEMS.find((item) => item.id === DEMO_MISSING_ITEM_ID)?.name ?? 'Required item'} not detected`,
+      detail: `${missing.readiness.confirmedRequiredCount} of ${missing.readiness.requiredCount} required items confirmed.`,
     }),
     ready: snapshotFrom(ready, 'ready', {
-      title: 'Ready for Calculus II',
+      title: `Ready for ${ready.activity.name}`,
       detail: `${ready.readiness.confirmedRequiredCount} of ${ready.readiness.requiredCount} required items confirmed. Scanned just now.`,
     }),
   }

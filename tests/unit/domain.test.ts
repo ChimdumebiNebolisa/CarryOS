@@ -9,15 +9,16 @@ import { scanId } from '@/lib/ids'
 import { DEMO_NOW, type Item, type Scan } from '@/domain/types'
 import { ACTIVITIES } from '@/fixtures/activities'
 import { ITEMS } from '@/fixtures/items'
+import { DEMO_SESSION_NOW } from '@/fixtures/demo-scenario'
 import { describe, expect, it } from 'vitest'
 
 const activity = ACTIVITIES[0]
 
-function closedScan(id = 'scan_test'): Scan {
+function closedScan(id = 'scan_test', at = DEMO_NOW): Scan {
   return {
     id,
-    startedAt: DEMO_NOW,
-    completedAt: DEMO_NOW,
+    startedAt: at,
+    completedAt: at,
     bagState: 'closed',
     status: 'completed',
     source: 'simulated-rfid',
@@ -42,7 +43,7 @@ describe('leave-by calculation', () => {
   it('subtracts travel and buffer from start time', () => {
     const leaveBy = calculateLeaveBy(activity.startTime, 18, 7)
     expect(new Date(leaveBy).toLocaleString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit' })).toBe(
-      '8:35 AM',
+      '9:35 AM',
     )
   })
 })
@@ -127,7 +128,7 @@ describe('readiness', () => {
   it('cannot be ready when a required item has no state', () => {
     const scan = closedScan()
     const inventory = evaluateInventory(ITEMS, [scan], [], { now: DEMO_NOW, bagIsOpen: false }).filter(
-      (state) => state.itemId !== 'calculator',
+      (state) => state.itemId !== 'notebook',
     )
     const readiness = getReadiness(activity, inventory, [scan], 'connected', { now: DEMO_NOW })
     expect(readiness.state).toBe('scan-required')
@@ -138,7 +139,7 @@ describe('readiness', () => {
     const observations = simulateClosedBagScan({
       scan,
       items: ITEMS,
-      tags: tags(['laptop', 'notebook', 'calculator', 'student-id']),
+      tags: tags(['laptop', 'charger', 'notebook', 'umbrella']),
       now: DEMO_NOW,
     })
     const inventory = evaluateInventory(ITEMS, [scan], observations, { now: DEMO_NOW, bagIsOpen: false })
@@ -150,35 +151,35 @@ describe('readiness', () => {
 
 describe('alerts', () => {
   it('creates one missing-item alert and updates it when evidence becomes uncertain', () => {
-    const missingScan = closedScan('scan_1')
+    const missingScan = closedScan('scan_1', DEMO_SESSION_NOW)
     const missingObs = simulateClosedBagScan({
       scan: missingScan,
       items: ITEMS,
-      tags: tags(['laptop', 'notebook', 'student-id']),
-      now: DEMO_NOW,
+      tags: tags(['laptop', 'charger', 'umbrella']),
+      now: DEMO_SESSION_NOW,
     })
-    const missingInventory = evaluateInventory(ITEMS, [missingScan], missingObs, { now: DEMO_NOW, bagIsOpen: false })
+    const missingInventory = evaluateInventory(ITEMS, [missingScan], missingObs, { now: DEMO_SESSION_NOW, bagIsOpen: false })
     const leaveBy = calculateLeaveBy(activity.startTime, 18, 7)
-    const first = evaluateAlerts(activity, ITEMS, missingInventory, [missingScan], [], { now: DEMO_NOW, leaveBy })
+    const first = evaluateAlerts(activity, ITEMS, missingInventory, [missingScan], [], { now: DEMO_SESSION_NOW, leaveBy })
     expect(first.created).toHaveLength(1)
     expect(first.created[0]?.type).toBe('missing-item')
 
-    const weakScan = closedScan('scan_2')
+    const weakScan = closedScan('scan_2', DEMO_SESSION_NOW)
     const weakObs = simulateClosedBagScan({
       scan: weakScan,
       items: ITEMS,
       tags: {
-        ...tags(['laptop', 'notebook', 'student-id']),
-        calculator: { present: true, quality: 'weak', locationHint: 'inside' },
+        ...tags(['laptop', 'charger', 'umbrella']),
+        notebook: { present: true, quality: 'weak', locationHint: 'inside' },
       },
-      now: DEMO_NOW,
+      now: DEMO_SESSION_NOW,
     })
     const weakInventory = evaluateInventory(ITEMS, [missingScan, weakScan], [...missingObs, ...weakObs], {
-      now: DEMO_NOW,
+      now: DEMO_SESSION_NOW,
       bagIsOpen: false,
     })
     const second = evaluateAlerts(activity, ITEMS, weakInventory, [missingScan, weakScan], first.alerts, {
-      now: DEMO_NOW,
+      now: DEMO_SESSION_NOW,
       leaveBy,
     })
     const unresolved = second.alerts.filter((alert) => ['active', 'acknowledged', 'suppressed'].includes(alert.status))
@@ -234,7 +235,7 @@ describe('demo scenario loop', () => {
     expect(session.readiness.state).toBe('missing')
     expect(session.alerts.filter((alert) => alert.status === 'active')).toHaveLength(1)
     session = openBag(session)
-    session = setItemPresent(session, 'calculator', true)
+    session = setItemPresent(session, 'notebook', true)
     session = closeBagAndScan(session)
     expect(session.readiness.state).toBe('ready')
     expect(session.alerts.some((alert) => alert.status === 'resolved')).toBe(true)

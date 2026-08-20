@@ -6,8 +6,8 @@ See the PRD IDs. Bootstrap verification:
 |----|--------|----------|
 | P-01 | PASS | Landing headline and copy |
 | P-02 | PASS | E2E CTA |
-| P-07 | PASS | E2E missing calculator |
-| P-08 | PASS | E2E rescan Ready |
+| P-07 | PASS | E2E missing notebook |
+| P-08 | PASS | E2E rescan Ready for Algorithms |
 | D-01 | PASS | Unit tests |
 | D-02 | PASS | Unit + e2e stale |
 | D-03 | PASS | Unit + e2e failed scan |

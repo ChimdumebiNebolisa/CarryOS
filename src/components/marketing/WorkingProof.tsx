@@ -1,64 +1,96 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { Check, CircleAlert, CircleDashed, ScanLine } from 'lucide-react'
 import { closeBagAndScan, createDemoSession, openBag, setItemPresent } from '@/application/demo-scenario'
 import { ITEM_STATE_LABELS } from '@/domain/types'
+import { DEMO_MISSING_ITEM_ID } from '@/fixtures/demo-scenario'
 import { Button } from '@/components/ui/button'
+import { formatClock } from '@/lib/utils'
 
 export function WorkingProof() {
-  const [session, setSession] = useState(() => createDemoSession())
-  const calculator = useMemo(
-    () => session.inventory.find((state) => state.itemId === 'calculator'),
+  const [session, setSession] = useState(() => closeBagAndScan(createDemoSession()))
+  const missingItem = useMemo(
+    () => session.inventory.find((state) => state.itemId === DEMO_MISSING_ITEM_ID),
     [session],
   )
+  const missingItemName = session.items.find((item) => item.id === DEMO_MISSING_ITEM_ID)?.name ?? 'Required item'
 
   return (
-    <section id="observed" className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
-      <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-        <div>
-          <p className="mono text-xs uppercase tracking-[0.18em] text-[var(--graphite)]">03 / Observed bag state</p>
-          <h2 className="mt-3 text-5xl leading-[0.92] sm:text-6xl">The bag tells a different story.</h2>
-          <p className="mt-4 max-w-xl text-[var(--ink-soft)]">
-            Close the bag and let the real CarryOS engine compare the requirements with the observed contents. The calculator is missing, so Carry says so.
-          </p>
-          <p className="mt-4 text-sm text-[var(--graphite)]">
-            Simulated RFID. The bag starts with a laptop sleeve, notebook, and student ID. The calculator is absent.
-          </p>
-        </div>
-        <div className="rounded-[1.75rem] border border-black/8 bg-[var(--paper-strong)] p-5 shadow-[0_20px_50px_rgba(26,24,20,0.08)]">
-          <p className="mono text-xs uppercase tracking-[0.16em] text-[var(--graphite)]" aria-live="polite">
-            {session.readiness.label}
-          </p>
-          <p className="mt-2 text-2xl">{session.readiness.detail}</p>
-          <p className="mt-3 text-sm">
-            Calculator: {calculator ? ITEM_STATE_LABELS[calculator.status] : 'Unknown'}
-          </p>
-          {session.alerts[0] ? (
-            <p className="mt-3 rounded-2xl bg-[var(--forest)] px-4 py-3 text-sm text-[var(--paper)]">
-              {session.alerts[0].evidence.summary} Leave by 8:35 AM.
-            </p>
-          ) : null}
-          <div className="mt-5 flex flex-wrap gap-2">
-            <Button
-              type="button"
-              onClick={() => setSession((current) => closeBagAndScan(current))}
-              disabled={session.sensorStatus === 'disconnected' || session.scans.some((scan) => scan.status === 'running')}
-            >
-              Close bag and scan
-            </Button>
-            <Button
-              type="button"
-              variant="paper"
-              onClick={() =>
-                setSession((current) => {
-                  const opened = current.bagIsOpen ? current : openBag(current)
-                  return setItemPresent(opened, 'calculator', true)
-                })
-              }
-            >
-              Add calculator
-            </Button>
+    <section id="system" className="landing-section landing-proof">
+      <div className="landing-section-heading landing-centered-heading">
+        <p className="landing-eyebrow">The working proof</p>
+        <h2>Context in. Evidence out.</h2>
+        <p>Close the bag and let the deterministic CarryOS engine reconcile what today requires with what the reader observed.</p>
+      </div>
+      <div className="landing-proof-grid">
+        <article className="landing-proof-card landing-proof-context">
+          <p className="landing-panel-label">Input / context</p>
+          <strong>{formatClock(session.activity.startTime)} / {session.activity.name}</strong>
+          <span>{session.activity.destination.name}</span>
+          <div className="landing-mini-list">
+            {session.activity.requiredItemIds.map((itemId) => (
+              <span key={itemId}>{session.items.find((item) => item.id === itemId)?.name ?? itemId}</span>
+            ))}
           </div>
+        </article>
+
+        <div className="landing-proof-core" aria-live="polite">
+          <span className="landing-core-kicker">Process / CarryOS</span>
+          <strong>{session.readiness.state === 'scan-required' ? 'Awaiting evidence' : session.readiness.label}</strong>
+          <span>{session.readiness.confirmedRequiredCount} / {session.readiness.requiredCount} confirmed</span>
+          <ScanLine className="landing-core-icon" size={28} aria-hidden="true" />
+        </div>
+
+        <article className="landing-proof-card landing-proof-observed">
+          <p className="landing-panel-label">Output / evidence</p>
+          {session.inventory.length === 0 ? (
+            <p className="landing-proof-empty">No closed-bag evidence yet.</p>
+          ) : (
+            <ul className="landing-observed-list">
+              {session.activity.requiredItemIds.map((itemId) => {
+                const state = session.inventory.find((candidate) => candidate.itemId === itemId)
+                const isMissing = state?.status === 'not-detected'
+                const isConfirmed = state?.status === 'confirmed-present'
+                return (
+                  <li key={itemId} className={isMissing ? 'is-missing' : isConfirmed ? '' : 'is-neutral'}>
+                    <span>{session.items.find((item) => item.id === itemId)?.name ?? itemId}</span>
+                    {isMissing ? <CircleAlert size={15} aria-hidden="true" /> : isConfirmed ? <Check size={15} aria-hidden="true" /> : <CircleDashed size={15} aria-hidden="true" />}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </article>
+      </div>
+      <div className="landing-proof-actions">
+        <div>
+          <p className="landing-proof-status" data-testid="proof-status">{session.readiness.detail}</p>
+          <p className="landing-proof-disclosure">
+            Simulated RFID input. {missingItemName} is absent in the canonical initial bag state. A scan does not invent a percentage.
+          </p>
+          {missingItem ? <p className="landing-proof-item-state">{missingItemName}: {ITEM_STATE_LABELS[missingItem.status]}</p> : null}
+        </div>
+        <div className="landing-actions">
+          <Button
+            type="button"
+            data-testid="close-scan"
+            onClick={() => setSession((current) => closeBagAndScan(current))}
+            disabled={session.sensorStatus === 'disconnected'}
+          >
+            Rescan the closed bag
+          </Button>
+          <Button
+            type="button"
+            variant="paper"
+            data-testid="add-notebook"
+            onClick={() => setSession((current) => {
+              const opened = current.bagIsOpen ? current : openBag(current)
+              return setItemPresent(opened, DEMO_MISSING_ITEM_ID, true)
+            })}
+          >
+            Add {missingItemName.toLowerCase()}
+          </Button>
         </div>
       </div>
     </section>

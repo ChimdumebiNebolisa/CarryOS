@@ -1,6 +1,7 @@
 import { closeBagAndScan, createDemoSession } from '@/application/demo-scenario'
 import { ITEM_STATE_LABELS, type InventoryState } from '@/domain/types'
 import { ITEMS } from '@/fixtures/items'
+import { DEMO_MISSING_ITEM_ID } from '@/fixtures/demo-scenario'
 
 export interface LandingReconciliationRow {
   itemId: string
@@ -33,14 +34,14 @@ export function buildLandingProof() {
     }
   })
 
-  const calculator = rows.find((row) => row.itemId === 'calculator')
-  const alert = session.alerts.find((candidate) => candidate.itemId === 'calculator')
+  const missingItem = rows.find((row) => row.itemId === DEMO_MISSING_ITEM_ID)
+  const alert = session.alerts.find((candidate) => candidate.itemId === DEMO_MISSING_ITEM_ID)
 
   return {
     activity: session.activity,
     travel: session.travel,
     rows,
-    calculator,
+    missingItem,
     alert,
     matchedCount: rows.filter((row) => row.relationship === 'matched').length,
     missingCount: rows.filter((row) => row.relationship === 'missing').length,

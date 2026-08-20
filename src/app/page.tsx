@@ -8,14 +8,16 @@ import { FutureScenarios } from '@/components/marketing/FutureScenarios'
 import { Hero } from '@/components/marketing/Hero'
 import { LimitationsSection } from '@/components/marketing/LimitationsSection'
 import { ReconciliationSection } from '@/components/marketing/ReconciliationSection'
+import { SensingSection } from '@/components/marketing/SensingSection'
 import { WorkingProof } from '@/components/marketing/WorkingProof'
 
 export default function HomePage() {
   return (
-    <main>
+    <main className="landing-page">
       <Hero />
       <ContextRequirements />
       <WorkingProof />
+      <SensingSection />
       <ReconciliationSection />
       <EvidenceSection />
       <AiBoundary />

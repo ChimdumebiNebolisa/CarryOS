@@ -1,49 +1,56 @@
+import { ArrowRight, CalendarDays, CloudRain, Laptop, NotebookTabs, Plug, Umbrella } from 'lucide-react'
 import { buildLandingProof } from '@/application/landing-proof'
+import { DEMO_WEATHER_NOTE } from '@/fixtures/demo-scenario'
 import { formatClock } from '@/lib/utils'
 
+const itemIcons = {
+  laptop: Laptop,
+  charger: Plug,
+  notebook: NotebookTabs,
+  umbrella: Umbrella,
+} as const
+
 export function ContextRequirements() {
-  const { activity, travel, rows } = buildLandingProof()
+  const { activity, rows } = buildLandingProof()
 
   return (
-    <section id="context" className="border-b border-black/8 bg-[var(--paper)] px-4 py-20 sm:px-6 lg:py-28">
-      <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
-        <div>
-          <p className="mono text-xs uppercase tracking-[0.18em] text-[var(--graphite)]">02 / Context to requirements</p>
-          <h2 className="mt-4 max-w-xl text-5xl leading-[0.92] sm:text-6xl">The day gives the bag a job.</h2>
-          <p className="mt-5 max-w-lg text-lg leading-8 text-[var(--ink-soft)]">
-            Carry starts with the commitment ahead, then turns that context into a checklist you can inspect and approve.
-          </p>
-        </div>
-        <article className="rounded-[2rem] border border-black/10 bg-[var(--paper-strong)] p-6 shadow-[0_20px_60px_rgba(26,24,20,0.08)] sm:p-8">
-          <div className="flex flex-wrap items-start justify-between gap-5 border-b border-black/8 pb-6">
-            <div>
-              <p className="mono text-xs uppercase tracking-[0.16em] text-[var(--graphite)]">Upcoming activity</p>
-              <h3 className="mt-2 text-3xl">{activity.name}</h3>
-              <p className="mt-2 text-[var(--ink-soft)]">{activity.destination.name}</p>
+    <section id="context" className="landing-section landing-context">
+      <div className="landing-section-heading landing-centered-heading">
+        <p className="landing-eyebrow">Context creates requirements</p>
+        <h2>Your bag changes because your day changes.</h2>
+        <p>Contextual signals become a concrete packing plan before sensing begins.</p>
+      </div>
+      <div className="landing-context-flow">
+        <article className="landing-context-source">
+          <p className="landing-panel-label">Context</p>
+          <div className="landing-signal-list">
+            <div className="landing-signal-row">
+              <span><CalendarDays size={16} aria-hidden="true" /> {formatClock(activity.startTime)} / {activity.name}</span>
+              <CalendarDays size={18} aria-hidden="true" />
             </div>
-            <p className="rounded-full bg-[var(--forest)] px-3 py-2 text-xs text-[var(--paper)]">Requirements ready</p>
+            <div className="landing-signal-row">
+              <span><CloudRain size={16} aria-hidden="true" /> {DEMO_WEATHER_NOTE}</span>
+              <CloudRain size={18} aria-hidden="true" />
+            </div>
           </div>
-          <dl className="grid gap-5 py-6 sm:grid-cols-3">
-            <div>
-              <dt className="mono text-xs uppercase tracking-[0.16em] text-[var(--graphite)]">Starts</dt>
-              <dd className="mt-2 text-xl">{formatClock(activity.startTime)}</dd>
-            </div>
-            <div>
-              <dt className="mono text-xs uppercase tracking-[0.16em] text-[var(--graphite)]">Leave by</dt>
-              <dd className="mt-2 text-xl">{travel ? formatClock(travel.leaveBy) : 'Unavailable'}</dd>
-            </div>
-            <div>
-              <dt className="mono text-xs uppercase tracking-[0.16em] text-[var(--graphite)]">Required</dt>
-              <dd className="mt-2 text-xl">{rows.length} items</dd>
-            </div>
-          </dl>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {rows.map((row) => (
-              <div key={row.itemId} className="flex items-center justify-between rounded-2xl bg-[var(--paper)] px-4 py-3 text-sm">
-                <span>{row.itemName}</span>
-                <span className="mono text-xs uppercase tracking-[0.12em] text-[var(--graphite)]">Required</span>
-              </div>
-            ))}
+        </article>
+        <div className="landing-context-derivation" aria-hidden="true">
+          <span>derive</span>
+          <ArrowRight size={22} />
+        </div>
+        <article className="landing-context-output">
+          <p className="landing-panel-label">Requirements</p>
+          <div className="landing-requirement-grid">
+            {rows.map((row) => {
+              const Icon = itemIcons[row.itemId as keyof typeof itemIcons] ?? NotebookTabs
+              const source = row.itemId === 'umbrella' ? 'Rain' : activity.name
+              return (
+                <div className="landing-requirement-chip" key={row.itemId}>
+                  <Icon size={16} aria-hidden="true" />
+                  <span><strong>{row.itemName}</strong><small>{source}</small></span>
+                </div>
+              )
+            })}
           </div>
         </article>
       </div>

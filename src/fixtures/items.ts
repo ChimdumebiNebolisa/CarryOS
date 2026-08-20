@@ -3,14 +3,14 @@ import type { Item } from '@/domain/types'
 export const ITEMS: Item[] = [
   {
     id: 'laptop',
-    name: 'Laptop sleeve',
+    name: 'Laptop',
     category: 'Tech',
     tagId: 'TAG-LAPTOP-001',
     tagPlacement: 'Inside sleeve seam',
   },
   {
     id: 'charger',
-    name: 'Charger strap',
+    name: 'Charger',
     category: 'Tech',
     tagId: 'TAG-CHARGER-001',
     tagPlacement: 'Cable organizer loop',
@@ -35,6 +35,13 @@ export const ITEMS: Item[] = [
     category: 'Essentials',
     tagId: 'TAG-ID-001',
     tagPlacement: 'Card sleeve edge',
+  },
+  {
+    id: 'umbrella',
+    name: 'Umbrella',
+    category: 'Weather',
+    tagId: 'TAG-UMBRELLA-001',
+    tagPlacement: 'Side pocket loop',
   },
   {
     id: 'headphones',

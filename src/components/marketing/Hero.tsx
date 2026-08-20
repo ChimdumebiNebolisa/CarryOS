@@ -1,48 +1,72 @@
 import Link from 'next/link'
-import { CarryStateStack } from '@/components/marketing/CarryStateStack'
+import Image from 'next/image'
+import { Check } from 'lucide-react'
+import { buildLandingProof } from '@/application/landing-proof'
 import { Button } from '@/components/ui/button'
 import { getPublicEnv } from '@/lib/env'
+import { formatClock } from '@/lib/utils'
 
 export function Hero() {
   const { repositoryUrl } = getPublicEnv()
+  const { activity, missingItem, rows } = buildLandingProof()
 
   return (
-    <section className="relative overflow-hidden bg-[var(--forest)] text-[var(--paper)]">
-      <div className="mx-auto flex min-h-[min(900px,100svh)] max-w-7xl flex-col px-4 pb-8 pt-5 sm:px-6 lg:pb-12">
-        <header className="flex items-center justify-between gap-4">
-          <p className="mono text-xs tracking-[0.22em] uppercase">CarryOS</p>
-          <nav className="flex items-center gap-4 text-sm text-white/70" aria-label="Primary navigation">
-            <Link href="/demo" className="hover:text-white">
-              Demo
-            </Link>
-            <a href={repositoryUrl} rel="noreferrer" target="_blank" className="hover:text-white">
-              Source ↗
-            </a>
+    <section className="landing-hero relative overflow-hidden">
+      <div className="landing-shell">
+        <header className="landing-nav">
+          <Link href="/" className="landing-wordmark">CarryOS</Link>
+          <nav className="landing-nav-links" aria-label="Primary navigation">
+            <a className="is-active" href="#system">System</a>
+            <a href="#sensing">Technology</a>
+            <a href="#future">Vision</a>
           </nav>
+          <Link className="landing-nav-button" href="/demo">Watch demo</Link>
         </header>
-        <div className="grid flex-1 items-center gap-12 py-16 lg:grid-cols-[0.92fr_1.08fr] lg:gap-8 lg:py-12">
-          <div className="max-w-2xl">
-            <p className="mono text-xs uppercase tracking-[0.2em] text-white/55">Backpack intelligence, made inspectable</p>
-            <h1 className="mt-5 max-w-2xl text-6xl leading-[0.86] sm:text-8xl lg:text-[7.75rem]">Your backpack should know what the day asks of you.</h1>
-            <p className="mt-7 max-w-xl text-lg leading-8 text-white/72 sm:text-xl">
-              Carry turns the next commitment into requirements, compares them with what was actually observed, and tells you what to do before you leave.
+
+        <div className="landing-hero-grid">
+          <div className="landing-hero-copy">
+            <p className="landing-eyebrow">CarryOS / Physical intelligence</p>
+            <h1>Your backpack should know what the day asks of you.</h1>
+            <p className="landing-hero-lede">
+              CarryOS turns the day ahead into a clear packing plan, then checks the closed bag before you leave.
             </p>
-            <div className="mt-9 flex flex-wrap items-center gap-3">
+            <div className="landing-actions">
               <Button asChild size="lg">
                 <Link href="/demo" data-testid="run-demo">Run the live demo</Link>
               </Button>
-              <Button asChild variant="ghost">
-                <a href={repositoryUrl} rel="noreferrer" target="_blank">
-                  View the source ↗
-                </a>
-              </Button>
+              <a className="landing-source-link" href={repositoryUrl} rel="noreferrer" target="_blank">View the source ↗</a>
             </div>
-            <p className="mt-6 max-w-lg text-sm leading-6 text-white/55">
-              This prototype uses simulated RFID input. It demonstrates the decision loop, not validated physical hardware.
-            </p>
+            <p className="landing-hero-proof-line">Context. Inventory belief. Leave by. Action.</p>
           </div>
-          <div className="min-w-0 lg:translate-y-6">
-            <CarryStateStack />
+
+          <div className="landing-hero-product" aria-labelledby="hero-product-title">
+            <div className="landing-hero-image-wrap">
+              <Image
+                src="/carryos-backpack.png"
+                alt="A matte black backpack presented as the physical object CarryOS reasons about"
+                className="landing-backpack-image"
+                width={1465}
+                height={1024}
+                priority
+              />
+              <span className="landing-hero-glow" aria-hidden="true" />
+            </div>
+            <div className="landing-intelligence-overlay">
+              <div className="landing-overlay-heading">
+                <span id="hero-product-title" className="landing-status-critical">{missingItem ? `${rows.filter((row) => row.relationship === 'missing').length} ITEM MISSING` : 'NO OPEN ALERT'}</span>
+                <span>{formatClock(activity.startTime)} / {activity.name}</span>
+              </div>
+              <ul>
+                {rows.map((row) => (
+                  <li key={row.itemId} className={row.relationship === 'missing' ? 'is-missing' : ''}>
+                    <span>{row.itemName}</span>
+                    {row.relationship === 'missing' ? <span className="landing-missing-chip">Missing</span> : <Check size={14} aria-hidden="true" />}
+                  </li>
+                ))}
+              </ul>
+              <span className="landing-overlay-connector" aria-hidden="true" />
+            </div>
+            <p className="landing-image-note">A physical anchor for inventory belief</p>
           </div>
         </div>
       </div>
