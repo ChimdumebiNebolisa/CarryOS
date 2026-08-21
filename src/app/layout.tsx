@@ -20,7 +20,7 @@ const mono = DM_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'CarryOS — Know before you go.',
+  title: 'CarryOS | Know before you go.',
   description: 'CarryOS knows what you’ll need today, checks what’s in your bag, and tells you what’s missing before you leave.',
 }
 

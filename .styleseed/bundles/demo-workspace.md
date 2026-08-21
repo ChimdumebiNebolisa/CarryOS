@@ -57,18 +57,18 @@ Core judgment
 When instructions disagree, use this order:
 
 1. **Core invariants** below.
-2. **Output grammar** — the functional visual language selected in `RULESETS.md`, or a
+2. **Output grammar:** the functional visual language selected in `RULESETS.md`, or a
    project-local grammar compiled by `REFERENCE-COMPILER.md`.
-3. **Surface adapter** — the renderer contract and physical constraints in `ADAPTERS.md`.
+3. **Surface adapter:** the renderer contract and physical constraints in `ADAPTERS.md`.
 4. **Domain playbook** and **page/artifact type**.
-5. **Brand recipe** — a reusable morphology and component-selection contract from
+5. **Brand recipe:** a reusable morphology and component-selection contract from
    `BRAND-RECIPES.md`.
-6. **Palette system** — a maintained semantic posture plus deterministic key-color generation,
+6. **Palette system:** a maintained semantic posture plus deterministic key-color generation,
    role mapping, gamut handling, and contrast correction from `PALETTE-RECIPES.md`.
-7. **Aesthetic profile** — an optional coordinated restyle from `PRESETS.md`.
-8. **Design lock** — records selections and bounded project parameters.
-9. **Skins and components** — implementation material, not sources of judgment.
-10. **Score and visual verification** — evidence that the method was applied.
+7. **Aesthetic profile:** an optional coordinated restyle from `PRESETS.md`.
+8. **Design lock:** records selections and bounded project parameters.
+9. **Skins and components:** implementation material, not sources of judgment.
+10. **Score and visual verification:** evidence that the method was applied.
 
 `STYLESEED.md` is persistence, not permission. An arbitrary value in the lock never turns
 a violation into a sound design decision. Unknown values fall back to the nearest maintained
@@ -90,7 +90,7 @@ These apply to every grammar, profile, domain, page, skin, and agent:
 - Controls remain operable: visible focus, sufficient targets, labels, reduced-motion
   support, and no dark patterns.
 - Motion fits the surface and never delays comprehension or action.
-- Distinctiveness comes from the product, its content, and its selected grammar — not a
+- Distinctiveness comes from the product, its content, and its selected grammar, not a
   copied demo, generic indigo, repeated icon chips, emoji chrome, or template uniformity.
 
 ## What the lock may select
@@ -124,7 +124,7 @@ drift, but they never choose or rewrite the design philosophy after the fact.
 
 StyleSeed may preserve a design lesson only when a person explicitly asks it to capture an
 accepted correction. The stored candidate contains generalized conditions, counterexamples, and
-measured evidence—not source code, prompts, screenshots, brand tokens, product identity, or user
+measured evidence, not source code, prompts, screenshots, brand tokens, product identity, or user
 content. Local review and export approval are separate decisions. Preparing a package does not
 transmit it. Returning it through MCP requires another one-time human grant and must be reported as
 client/model exposure. No candidate may automatically modify project or core rules.
@@ -193,7 +193,7 @@ Core direction:
 
 ## 8. Education / Learning / Courses
 
-- **Color:** encouraging — accent marks progress and the next step. Use color to
+- **Color:** encouraging; accent marks progress and the next step. Use color to
   reward (completed = success tone), not to decorate.
 - **Density:** low per step (one concept at a time), denser in course index.
 - **Typography:** clear hierarchy, readable body, prominent "what's next."
@@ -211,7 +211,7 @@ Core direction:
 ## Dashboard / Home / Overview
 
 - **Job:** answer "how are things?" in 3 seconds, then let the user drill down.
-- **Structure:** information pyramid — one hero metric → a small KPI set →
+- **Structure:** information pyramid: one hero metric → a small KPI set →
   supporting list/chart. Vary section types (Rule 14/61): never four identical
   cards in a row.
 - **Hierarchy:** density increases as you scroll. Top = 48px hero number; bottom
@@ -294,7 +294,7 @@ defaults. `PRODUCT-PRINCIPLES.md` remains the higher authority.
 ## Hierarchy and composition
 
 - Give every screen one dominant user decision or reading promise. Supporting content must recede
-  through scale, position, contrast, density, or disclosure—not random color.
+  through scale, position, contrast, density, or disclosure, not random color.
 - Proximity communicates grouping: space around a group should normally be at least twice the
   space within it. Repeated sections need deliberate variation in height, density, or composition.
 - Use real product content and evidence. Placeholder dashboards, fake metrics, stock chat panels,
