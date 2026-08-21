@@ -43,6 +43,7 @@ export type TraceEventName =
   | 'notification-emitted'
   | 'reader-disconnected'
   | 'reader-reconnected'
+  | 'evidence-corruption-detected'
   | 'demo-initialized'
   | 'demo-reset'
 
@@ -82,7 +83,7 @@ export interface TravelEstimate {
 export interface TagObservation {
   id: string
   scanId: string
-  itemId?: string
+  itemId: string
   tagId: string
   detectedAt: string
   signalStrength?: number
@@ -108,6 +109,7 @@ export interface InventoryState {
   status: ItemStateStatus
   confidence: number
   reasonCode: string
+  sourceScanId: string | null
   supportingObservationIds: string[]
   updatedAt: string
 }
@@ -115,7 +117,10 @@ export interface InventoryState {
 export interface AlertEvidence {
   activityName: string
   itemName: string
+  scanId: string
   latestScanAt: string
+  inventoryUpdatedAt: string
+  supportingObservationIds: string[]
   inventoryState: ItemStateStatus
   confidence: number
   leaveBy?: string

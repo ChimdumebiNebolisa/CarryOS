@@ -34,12 +34,12 @@ Rebuild Carry as a Next.js App Router product that connects event context, user-
 
 | Gate | Status | Notes |
 |------|--------|-------|
-| Evidence before confidence | PASS | Domain engine owns inventory/readiness; failed/stale/unknown cannot be Ready |
+| Evidence before confidence | PASS | Ready requires current-scan provenance and registered supporting observations; failed/stale/unknown/malformed state cannot be Ready |
 | Belief, not database truth | PASS | Five inventory states; bag-open invalidates freshness |
 | AI proposes, users approve, evidence decides | PASS | Route Handler validates; approval is client workflow; model cannot mutate sensor/readiness |
 | Deterministic domain independence | PASS | `src/domain/*` has no Date.now/Math.random/React/network |
 | Visible simulation | PASS | Simulated RFID labeled; no fake Maps adapter |
-| Shared proof engine | PASS | Hero, landing proof, and demo consume the same application/demo-scenario module |
+| Shared proof engine | PASS | Landing reconciliation proof and demo share the application/domain scenario; the hero is intentionally a static product illustration |
 | One visual system | PASS | Two 21st.dev references only; independently reimplemented |
 | No fake completeness | PASS | Fallback labeled; no testimonials/metrics/hardware photography |
 | Verification | PASS | Unit, API, component, integration, e2e, CI required |

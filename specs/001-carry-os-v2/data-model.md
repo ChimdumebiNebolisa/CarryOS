@@ -6,7 +6,7 @@ All domain types live in `src/domain/types.ts`. Pure functions consume injected 
 
 | Field | Type | Notes |
 |-------|------|-------|
-| id | string | Registry ID: laptop, charger, notebook, calculator, student-id, headphones, keys, water-bottle |
+| id | string | Registry ID: laptop, charger, notebook, calculator, student-id, umbrella, headphones, keys, water-bottle |
 | name | string | Display name |
 | category | string | Tech, Study, Essentials, Personal |
 | tagId | string | Simulated tag identity |
@@ -34,7 +34,7 @@ All domain types live in `src/domain/types.ts`. Pure functions consume injected 
 |-------|------|-------|
 | id | string | Deterministic from scan + tag |
 | scanId | string | |
-| itemId | string? | |
+| itemId | string | Registered item identity; runtime validation requires it to match `tagId` |
 | tagId | string | |
 | detectedAt | ISO string | |
 | signalStrength | number? | dBm-like demo value |
@@ -61,6 +61,7 @@ All domain types live in `src/domain/types.ts`. Pure functions consume injected 
 | status | confirmed-present \| probably-present \| not-detected \| unknown \| stale | |
 | confidence | 0–1 | Demonstration policy, not model confidence |
 | reasonCode | string | |
+| sourceScanId | string \| null | Latest trustworthy successful scan, or explicit null when no trustworthy scan exists |
 | supportingObservationIds | string[] | |
 | updatedAt | ISO | |
 
@@ -73,6 +74,8 @@ All domain types live in `src/domain/types.ts`. Pure functions consume injected 
 - Valid scan, strong closed-bag evidence, hint not outside → `confirmed-present`
 - Bag opened after evidence, or stale threshold exceeded → `stale`
 
+Confirmed and probable states reference the complete current observation set for their registered item and the latest trustworthy successful scan. Not-detected states reference that scan with an empty observation set. Unknown states may use explicit null provenance. Duplicate, missing, cross-scan, stale, or status/confidence-inconsistent provenance fails closed.
+
 ## Alert
 
 | Field | Type | Notes |
@@ -83,7 +86,7 @@ All domain types live in `src/domain/types.ts`. Pure functions consume injected 
 | status | active \| acknowledged \| suppressed \| resolved \| expired | |
 | stateVersion | number | Increments on type/evidence update |
 | createdAt / updatedAt / resolvedAt | ISO | |
-| evidence | AlertEvidence | activity, item, scan time, state, confidence, leave-by, next action |
+| evidence | AlertEvidence | activity, item, scan ID/time, inventory derivation time, observation IDs, state, confidence, leave-by, next action |
 
 Unresolved = active | acknowledged | suppressed. At most one unresolved per activity+item. Missing↔uncertain updates that row.
 
@@ -97,11 +100,13 @@ Typed event name, ISO timestamp from injected clock, redacted payload. Forbidden
 
 ## Demo session (application state, not persisted)
 
-Canonical scenario from fixtures. Reset restores it. Hero, landing proof, and demo MUST share this module.
+Canonical scenario from fixtures. Reset restores its 9:21 AM starting point; the injected runtime clock then advances. The landing reconciliation proof and demo share the scenario/domain engine. The hero is a static product illustration.
 
 ## Validation rules
 
 - Required and optional item ID sets are disjoint and subset of registry
+- All temporal domain inputs use strict RFC 3339 datetimes with an explicit timezone
+- A malformed latest evidence record fails closed; later valid evidence may establish a new boundary while corruption remains traceable
 - Confidence 0–1
 - Suggestion output max 8 total suggestions
 - Duplicate suggestion IDs invalid

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   acknowledge,
+  advanceTime,
   applySuggestionDecision,
   armFailedScan,
   closeBagAndScan,
@@ -20,9 +21,12 @@ import {
   suppress,
   type DemoSession,
 } from '@/application/demo-scenario'
+import { shouldNotify } from '@/application/notification-policy'
 import { isAlertActionable, isAlertCountable, isAlertVisible } from '@/domain/alerts'
 import { ITEM_STATE_LABELS, type CarryProfileResult } from '@/domain/types'
 import { Button } from '@/components/ui/button'
+import { AdvancingClock, type Clock } from '@/lib/clock'
+import { parseFiniteTimestamp } from '@/domain/time'
 import { formatClock } from '@/lib/utils'
 
 export function DemoWorkspace() {
@@ -30,12 +34,54 @@ export function DemoWorkspace() {
   const [selectedAlert, setSelectedAlert] = useState<string | null>(null)
   const [aiStatus, setAiStatus] = useState('')
   const [aiBusy, setAiBusy] = useState(false)
-  const alert = session.alerts.find((item) => item.id === selectedAlert)
+  const alert = session.alerts.find((item) => item.id === selectedAlert && isAlertVisible(item))
   const requestGeneration = useRef(0)
   const requestController = useRef<AbortController | null>(null)
   const lastAlertTrigger = useRef<HTMLButtonElement | null>(null)
+  const alertHeading = useRef<HTMLHeadingElement | null>(null)
+  const previousAlerts = useRef(session.alerts)
+  const clock = useRef<Clock | null>(null)
+  if (clock.current === null) clock.current = new AdvancingClock()
 
   useEffect(() => () => requestController.current?.abort(), [])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setSession((current) => advanceTime(current, clock.current!.now()))
+    }, 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    const deadlines = [
+      session.activity.startTime,
+      ...session.alerts
+        .filter((item) => item.status === 'suppressed' && item.snoozedUntil)
+        .map((item) => item.snoozedUntil!),
+    ]
+      .map(parseFiniteTimestamp)
+      .filter((value): value is number => value !== undefined)
+    if (deadlines.length === 0) return
+    const nowMs = parseFiniteTimestamp(clock.current!.now())
+    if (nowMs === undefined) return
+    const nextDeadline = deadlines.filter((deadline) => deadline > nowMs).sort((left, right) => left - right)[0]
+    if (nextDeadline === undefined) return
+    const timer = window.setTimeout(() => {
+      setSession((current) => advanceTime(current, clock.current!.now()))
+    }, nextDeadline - nowMs)
+    return () => window.clearTimeout(timer)
+  }, [session.activity.startTime, session.alerts])
+
+  useEffect(() => {
+    const decision = shouldNotify(previousAlerts.current, session.alerts, session.browserPermission)
+    if (decision.emitBrowser && typeof Notification !== 'undefined') {
+      for (const actionable of decision.alerts) {
+        const notification = session.notifications.find((candidate) => candidate.alertId === actionable.id)
+        if (notification) new Notification(notification.title, { body: notification.body })
+      }
+    }
+    previousAlerts.current = session.alerts
+  }, [session.alerts, session.browserPermission, session.notifications])
 
   function openAlert(alertId: string, trigger: HTMLButtonElement) {
     lastAlertTrigger.current = trigger
@@ -46,27 +92,18 @@ export function DemoWorkspace() {
     requestGeneration.current += 1
     requestController.current?.abort()
     requestController.current = null
+    clock.current = new AdvancingClock()
     setSession(resetDemo())
     setSelectedAlert(null)
     setAiStatus('')
     setAiBusy(false)
   }
   function update(updater: (current: DemoSession) => DemoSession) {
-    setSession((current) => {
-      const next = updater(current)
-      if (typeof Notification !== 'undefined' && next.browserPermission === 'granted') {
-        const existingNotificationIds = new Set(current.notifications.map((notification) => notification.id))
-        for (const notification of next.notifications) {
-          if (!existingNotificationIds.has(notification.id)) {
-            new Notification(notification.title, { body: notification.body })
-          }
-        }
-      }
-      return next
-    })
+    setSession(updater)
   }
 
   async function requestProfile() {
+    requestController.current?.abort()
     const generation = requestGeneration.current + 1
     requestGeneration.current = generation
     const controller = new AbortController()
@@ -99,7 +136,7 @@ export function DemoWorkspace() {
         setAiStatus('error' in body ? body.error : 'Suggestions are unavailable. Try again.')
         return
       }
-      setSession((current) => setSuggestions(current, body, body.source === 'fallback' ? 'Deterministic fallback' : 'Validated model output'))
+      update((current) => setSuggestions(current, body, body.source === 'fallback' ? 'Deterministic fallback' : 'Validated model output'))
       setAiStatus(body.source === 'fallback' ? 'Deterministic fallback' : 'Model suggestions ready. Approve before they change requirements.')
     } catch {
       if (controller.signal.aborted || requestGeneration.current !== generation) return
@@ -139,8 +176,9 @@ export function DemoWorkspace() {
         <AlertPanel
           session={session}
           onOpen={openAlert}
-          onAck={(id) => setSession((current) => acknowledge(current, id))}
-          onSnooze={(id) => setSession((current) => suppress(current, id))}
+          headingRef={alertHeading}
+          onAck={(id) => update((current) => acknowledge(current, id))}
+          onSnooze={(id) => update((current) => suppress(current, id))}
         />
         <CarryProfilePanel
           session={session}
@@ -148,7 +186,7 @@ export function DemoWorkspace() {
           status={aiStatus}
           onRequest={() => void requestProfile()}
           onDecide={(itemId, decision, bucket) =>
-            setSession((current) => applySuggestionDecision(current, itemId, decision, bucket))
+            update((current) => applySuggestionDecision(current, itemId, decision, bucket))
           }
         />
         <TracePanel session={session} />
@@ -160,7 +198,8 @@ export function DemoWorkspace() {
             className="fixed inset-y-0 right-0 w-full max-w-md overflow-y-auto bg-[var(--paper-strong)] p-6 shadow-2xl focus-visible:ring-2 focus-visible:ring-[var(--ink)] focus-visible:ring-offset-2"
             onCloseAutoFocus={(event) => {
               event.preventDefault()
-              lastAlertTrigger.current?.focus()
+              if (lastAlertTrigger.current?.isConnected) lastAlertTrigger.current.focus()
+              else alertHeading.current?.focus()
             }}
           >
             <Dialog.Title className="text-2xl">Alert evidence</Dialog.Title>
@@ -316,11 +355,13 @@ function SensorLab({
 function AlertPanel({
   session,
   onOpen,
+  headingRef,
   onAck,
   onSnooze,
 }: {
   session: DemoSession
   onOpen: (id: string, trigger: HTMLButtonElement) => void
+  headingRef: React.RefObject<HTMLHeadingElement | null>
   onAck: (id: string) => void
   onSnooze: (id: string) => void
 }) {
@@ -328,7 +369,7 @@ function AlertPanel({
   const countable = session.alerts.filter(isAlertCountable)
   return (
     <section className="rounded-3xl border border-black/8 bg-[var(--paper-strong)] p-5">
-      <h2 className="text-2xl">Alerts</h2>
+      <h2 className="text-2xl" ref={headingRef} tabIndex={-1}>Alerts</h2>
       <p className="mt-2 text-sm text-[var(--graphite)]" data-testid="alert-count">
         {countable.length} actionable
       </p>

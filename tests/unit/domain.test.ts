@@ -121,7 +121,11 @@ describe('readiness', () => {
   it('uses sensor-unavailable before missing', () => {
     const scan: Scan = { ...closedScan(), status: 'failed' }
     const inventory = evaluateInventory(ITEMS, [scan], [], { now: DEMO_NOW, bagIsOpen: false })
-    const readiness = getReadiness(activity, inventory, [scan], 'connected', { now: DEMO_NOW })
+    const readiness = getReadiness(activity, inventory, [scan], 'connected', {
+      now: DEMO_NOW,
+      items: ITEMS,
+      observations: [],
+    })
     expect(readiness.state).toBe('sensor-unavailable')
   })
 
@@ -130,7 +134,11 @@ describe('readiness', () => {
     const inventory = evaluateInventory(ITEMS, [scan], [], { now: DEMO_NOW, bagIsOpen: false }).filter(
       (state) => state.itemId !== 'notebook',
     )
-    const readiness = getReadiness(activity, inventory, [scan], 'connected', { now: DEMO_NOW })
+    const readiness = getReadiness(activity, inventory, [scan], 'connected', {
+      now: DEMO_NOW,
+      items: ITEMS,
+      observations: [],
+    })
     expect(readiness.state).toBe('scan-required')
   })
 
@@ -143,7 +151,11 @@ describe('readiness', () => {
       now: DEMO_NOW,
     })
     const inventory = evaluateInventory(ITEMS, [scan], observations, { now: DEMO_NOW, bagIsOpen: false })
-    const readiness = getReadiness(activity, inventory, [scan], 'connected', { now: DEMO_NOW })
+    const readiness = getReadiness(activity, inventory, [scan], 'connected', {
+      now: DEMO_NOW,
+      items: ITEMS,
+      observations,
+    })
     expect(readiness.state).toBe('ready')
     expect(inventory.find((state) => state.itemId === 'headphones')?.status).toBe('not-detected')
   })
@@ -160,7 +172,11 @@ describe('alerts', () => {
     })
     const missingInventory = evaluateInventory(ITEMS, [missingScan], missingObs, { now: DEMO_SESSION_NOW, bagIsOpen: false })
     const leaveBy = calculateLeaveBy(activity.startTime, 18, 7)
-    const first = evaluateAlerts(activity, ITEMS, missingInventory, [missingScan], [], { now: DEMO_SESSION_NOW, leaveBy })
+    const first = evaluateAlerts(activity, ITEMS, missingInventory, [missingScan], [], {
+      now: DEMO_SESSION_NOW,
+      observations: missingObs,
+      leaveBy,
+    })
     expect(first.created).toHaveLength(1)
     expect(first.created[0]?.type).toBe('missing-item')
 
@@ -180,6 +196,7 @@ describe('alerts', () => {
     })
     const second = evaluateAlerts(activity, ITEMS, weakInventory, [missingScan, weakScan], first.alerts, {
       now: DEMO_SESSION_NOW,
+      observations: [...missingObs, ...weakObs],
       leaveBy,
     })
     const unresolved = second.alerts.filter((alert) => ['active', 'acknowledged', 'suppressed'].includes(alert.status))

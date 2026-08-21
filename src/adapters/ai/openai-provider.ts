@@ -24,12 +24,15 @@ export class OpenAIProvider implements ModelProvider {
     return Boolean(this.apiKey && this.model)
   }
 
-  async infer(request: CarryProfileRequest, items: Item[]): Promise<unknown> {
+  async infer(request: CarryProfileRequest, items: Item[], signal?: AbortSignal): Promise<unknown> {
     if (!this.apiKey || !this.model) {
       throw new Error('Provider is not configured.')
     }
 
     const controller = new AbortController()
+    const abortFromCaller = () => controller.abort(signal?.reason)
+    signal?.addEventListener('abort', abortFromCaller, { once: true })
+    if (signal?.aborted) abortFromCaller()
     const timer = setTimeout(() => controller.abort(), this.timeoutMs)
     try {
       const response = await this.fetchImpl(this.baseUrl, {
@@ -147,6 +150,7 @@ export class OpenAIProvider implements ModelProvider {
       return JSON.parse(outputText) as unknown
     } finally {
       clearTimeout(timer)
+      signal?.removeEventListener('abort', abortFromCaller)
     }
   }
 }

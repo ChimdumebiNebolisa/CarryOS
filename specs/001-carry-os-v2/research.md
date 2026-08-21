@@ -1,5 +1,7 @@
 # Research: CarryOS v2
 
+> Historical planning record. The authoritative implementation is the Next.js v2 application now present in this repository; references below to creating a separate repository describe the superseded planning assumption, not the reachable architecture.
+
 ## Decision: Next.js App Router in a new repository
 
 **Rationale**: Approved PRD. Existing CarryOS is Vite + monolithic UI and must remain read-only.

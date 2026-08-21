@@ -1,5 +1,7 @@
 import {
   acknowledge,
+  advanceTime,
+  applySuggestionDecision,
   closeBagAndScan,
   createDemoSession,
   openBag,
@@ -96,6 +98,18 @@ describe('alert lifecycle state machine', () => {
     expect(session.alerts[0]?.evidence.latestScanAt).toBe('2026-08-05T09:22:00-05:00')
   })
 
+  it('refreshes scan provenance at the same timestamp without notifying twice', () => {
+    let session = missingSession()
+    const original = session.alerts[0]!
+    const notificationCount = session.notifications.length
+    session = closeBagAndScan(session)
+
+    expect(session.alerts[0]?.id).toBe(original.id)
+    expect(session.alerts[0]?.stateVersion).toBe(original.stateVersion + 1)
+    expect(session.alerts[0]?.evidence.scanId).not.toBe(original.evidence.scanId)
+    expect(session.notifications).toHaveLength(notificationCount)
+  })
+
   it('resolves the alert and removes its notification when evidence confirms the item', () => {
     let session = missingSession()
     session = openBag(session)
@@ -154,5 +168,110 @@ describe('alert lifecycle state machine', () => {
       (alert) => alert.itemId === 'notebook' && ['active', 'acknowledged', 'suppressed'].includes(alert.status),
     )
     expect(unresolved).toHaveLength(1)
+  })
+
+  it('resolves without reactivation when snooze expires as the item becomes confirmed', () => {
+    let session = missingSession()
+    session = suppress(session, session.alerts[0]!.id)
+    session = setItemPresent({ ...session, now: '2026-08-05T09:52:00-05:00' }, 'notebook', true)
+    session = closeBagAndScan(session)
+
+    expect(session.alerts[0]?.status).toBe('resolved')
+    expect(session.trace[0]?.name).toBe('alert-resolved')
+    expect(session.trace.some((event) => event.name === 'alert-reactivated')).toBe(false)
+  })
+
+  it('resolves without reactivation when snooze expires as the requirement is removed', () => {
+    let session = missingSession()
+    session = suppress(session, session.alerts[0]!.id)
+    session = {
+      ...session,
+      now: '2026-08-05T09:52:00-05:00',
+      suggestions: {
+        source: 'fallback',
+        requiredItems: [],
+        optionalItems: [],
+        excludedItems: [],
+        unregisteredSuggestions: [],
+      },
+    }
+    session = applySuggestionDecision(session, 'notebook', 'approved', 'excluded')
+
+    expect(session.alerts[0]?.status).toBe('resolved')
+    expect(session.trace[0]?.name).toBe('alert-resolved')
+    expect(session.trace.some((event) => event.name === 'alert-reactivated')).toBe(false)
+  })
+
+  it('resolves without reactivation when snooze expires as the activity is canceled', () => {
+    let session = missingSession()
+    session = suppress(session, session.alerts[0]!.id)
+    session = advanceTime(
+      { ...session, activity: { ...session.activity, status: 'cancelled' } },
+      '2026-08-05T09:52:00-05:00',
+    )
+
+    expect(session.alerts[0]?.status).toBe('resolved')
+    expect(session.trace[0]?.name).toBe('alert-resolved')
+    expect(session.trace.some((event) => event.name === 'alert-reactivated')).toBe(false)
+  })
+
+  it('does not reactivate an expired snooze when current evidence is malformed', () => {
+    let session = missingSession()
+    session = suppress(session, session.alerts[0]!.id)
+    session = {
+      ...session,
+      scans: [
+        ...session.scans,
+        {
+          id: 'scan_malformed_latest',
+          startedAt: 'not-a-timestamp',
+          completedAt: 'not-a-timestamp',
+          bagState: 'closed',
+          status: 'completed',
+          source: 'simulated-rfid',
+        },
+      ],
+    }
+    session = advanceTime(session, '2026-08-05T09:52:00-05:00')
+
+    expect(session.alerts[0]?.status).toBe('suppressed')
+    expect(session.notifications).toEqual([])
+    expect(session.trace.some((event) => event.name === 'alert-reactivated')).toBe(false)
+  })
+
+  it('applies terminal activity state despite malformed historical evidence', () => {
+    let session = missingSession()
+    session = {
+      ...session,
+      activity: { ...session.activity, status: 'completed' },
+      scans: [
+        ...session.scans,
+        {
+          id: 'scan_malformed_latest',
+          startedAt: 'not-a-timestamp',
+          completedAt: 'not-a-timestamp',
+          bagState: 'closed',
+          status: 'completed',
+          source: 'simulated-rfid',
+        },
+      ],
+    }
+    session = advanceTime(session, '2026-08-05T09:22:00-05:00')
+
+    expect(session.alerts[0]?.status).toBe('expired')
+    expect(session.trace[0]?.name).toBe('alert-expired')
+  })
+
+  it('reconciles simultaneous alerts without duplicates across evidence refresh', () => {
+    let session = createDemoSession()
+    session = setItemPresent(session, 'charger', false)
+    session = closeBagAndScan(session)
+    expect(session.alerts.filter((alert) => alert.status === 'active')).toHaveLength(2)
+    expect(session.notifications).toHaveLength(2)
+
+    session = closeBagAndScan(session)
+    expect(session.alerts.filter((alert) => alert.status === 'active')).toHaveLength(2)
+    expect(session.notifications).toHaveLength(2)
+    expect(new Set(session.notifications.map((notification) => notification.alertId)).size).toBe(2)
   })
 })

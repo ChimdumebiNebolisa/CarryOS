@@ -65,6 +65,7 @@
 | 413 | Body > 8 KB | `{ "error": "...", "code": "payload-too-large" }` |
 | 429 | Throttled | `{ "error": "Suggestions are temporarily limited. Try again shortly.", "code": "rate-limited" }` |
 | 405 | Non-POST | `{ "error": "...", "code": "method-not-allowed" }` |
+| 499 | Caller canceled an in-flight request | `{ "error": "Request canceled.", "code": "request-canceled" }` |
 | 200 fallback | Missing credentials, timeout, network, invalid schema after one retry | Success shape with `source: "fallback"` |
 
 Provider errors MUST NOT be forwarded. No raw model JSON on failure.
@@ -72,6 +73,7 @@ Provider errors MUST NOT be forwarded. No raw model JSON on failure.
 ## Provider timeout and retry
 
 - Hard timeout (8s recommended)
+- Client/request cancellation propagates to provider fetch work when supported
 - At most one schema-repair retry when output is malformed
 - Then fallback
 

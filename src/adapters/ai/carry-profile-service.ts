@@ -24,11 +24,15 @@ export async function handleCarryProfile(
     nowMs?: number
     provider?: OpenAIProvider
     store?: RateLimitStore
+    signal?: AbortSignal
   } = {},
 ): Promise<CarryProfileHttpResult> {
   const nowMs = options.nowMs ?? Date.now()
   const provider = options.provider ?? new OpenAIProvider()
   const store = options.store ?? defaultStore
+  if (options.signal?.aborted) {
+    return { status: 499, body: { error: 'Request canceled.', code: 'request-canceled' } }
+  }
   if (!contentType?.toLowerCase().includes('application/json')) {
     return { status: 415, body: { error: 'Send JSON.', code: 'unsupported-media-type' } }
   }
@@ -65,15 +69,21 @@ export async function handleCarryProfile(
   }
 
   try {
-    const raw = await provider.infer(parsed.data, items)
+    const raw = await provider.infer(parsed.data, items, options.signal)
     const normalized = normalizeCarryProfile(raw, items, 'model')
     if (normalized) return { status: 200, body: normalized }
 
-    const retry = await provider.infer(parsed.data, items)
+    if (options.signal?.aborted) {
+      return { status: 499, body: { error: 'Request canceled.', code: 'request-canceled' } }
+    }
+    const retry = await provider.infer(parsed.data, items, options.signal)
     const repaired = normalizeCarryProfile(retry, items, 'model')
     if (repaired) return { status: 200, body: repaired }
     return { status: 200, body: fallbackProfile(parsed.data, items) }
   } catch {
+    if (options.signal?.aborted) {
+      return { status: 499, body: { error: 'Request canceled.', code: 'request-canceled' } }
+    }
     return { status: 200, body: fallbackProfile(parsed.data, items) }
   }
 }

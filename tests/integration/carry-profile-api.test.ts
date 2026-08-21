@@ -2,6 +2,7 @@ import { handleCarryProfile } from '@/adapters/ai/carry-profile-service'
 import { OpenAIProvider } from '@/adapters/ai/openai-provider'
 import { createRateLimitStore } from '@/adapters/rate-limit/rate-limiter'
 import { ITEMS } from '@/fixtures/items'
+import type { CarryProfileRequest, Item } from '@/domain/types'
 import { describe, expect, it } from 'vitest'
 
 const validBody = JSON.stringify({
@@ -16,7 +17,7 @@ const validBody = JSON.stringify({
 })
 
 class FakeProvider extends OpenAIProvider {
-  constructor(private readonly impl: () => Promise<unknown>) {
+  constructor(private readonly impl: (signal?: AbortSignal) => Promise<unknown>) {
     super('test-key', 'test-model')
   }
 
@@ -24,8 +25,8 @@ class FakeProvider extends OpenAIProvider {
     return true
   }
 
-  async infer(): Promise<unknown> {
-    return this.impl()
+  async infer(_request: CarryProfileRequest, _items: Item[], signal?: AbortSignal): Promise<unknown> {
+    return this.impl(signal)
   }
 }
 
@@ -100,5 +101,28 @@ describe('carry-profile API', () => {
     }
     expect(last.status).toBe(429)
     if ('code' in last.body) expect(last.body.code).toBe('rate-limited')
+  })
+
+  it('propagates request cancellation to provider work', async () => {
+    const controller = new AbortController()
+    let receivedSignal = false
+    const provider = new FakeProvider(
+      (signal) =>
+        new Promise((_resolve, reject) => {
+          receivedSignal = signal === controller.signal
+          signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true })
+        }),
+    )
+    const resultPromise = handleCarryProfile(validBody, 'application/json', ITEMS, 'cancel', {
+      provider,
+      signal: controller.signal,
+    })
+    controller.abort()
+
+    await expect(resultPromise).resolves.toMatchObject({
+      status: 499,
+      body: { code: 'request-canceled' },
+    })
+    expect(receivedSignal).toBe(true)
   })
 })

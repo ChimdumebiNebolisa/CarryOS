@@ -16,16 +16,19 @@ Open the URL Next.js prints. `/` is the public landing page. `/demo` is the full
 ## What is real
 
 - Deterministic inventory states: Confirmed, Probable, Not detected, Unknown, and Stale.
-- Ready only when every required item is confirmed by a recent valid closed-bag scan.
-- One bounded model feature: suggest which registered items an event may require.
+- Ready only when every required item has one valid state derived from the latest successful closed-bag scan and that scan's registered supporting observations.
+- One bounded model feature: suggest which registered items the current Algorithms event may require.
 - Explicit approval before suggestions change an activity checklist.
 - Deterministic fallback when `OPENAI_API_KEY` is absent.
 
 RFID input is simulated. Carry does not claim physical reader validation.
 
+The demonstration starts at the canonical 9:21 AM scenario time and then advances from an injected clock. Reset returns it to 9:21 AM. Snoozed alerts are reevaluated at their absolute deadline.
+
 ## AI boundary
 
 The model cannot decide sensor observations, inventory presence, staleness, readiness, alert resolution, or travel time.
+The `/demo` generator submits the current fixed Algorithms context; it is not a general event-entry form.
 
 ## Environment
 

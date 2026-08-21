@@ -4,7 +4,7 @@ import {
   hasValidScanHistory,
   isValidInventoryState,
 } from '@/domain/inventory'
-import type { Activity, InventoryState, Readiness, Scan, SensorStatus } from '@/domain/types'
+import type { Activity, InventoryState, Item, Readiness, Scan, SensorStatus, TagObservation } from '@/domain/types'
 import { DEFAULT_CONFIG, type InventoryConfig } from '@/domain/types'
 import { isFreshPastTimestamp, parseFiniteTimestamp } from '@/domain/time'
 
@@ -13,14 +13,24 @@ export function getReadiness(
   inventory: InventoryState[],
   scans: Scan[],
   sensorStatus: SensorStatus,
-  options: { now: string; config?: InventoryConfig } = { now: activity.startTime },
+  options: { now: string; items: Item[]; observations: TagObservation[]; config?: InventoryConfig },
 ): Readiness {
   const requiredCount = activity.requiredItemIds.length
   const requiredStateGroups = activity.requiredItemIds.map((itemId) =>
     inventory.filter((state) => state.itemId === itemId),
   )
   const requiredStates = requiredStateGroups.map((states) => states[0])
-  const confirmedRequiredCount = requiredStates.filter((state) => state?.status === 'confirmed-present').length
+  const confirmedRequiredCount = requiredStates.filter(
+    (state) =>
+      state?.status === 'confirmed-present' &&
+      isValidInventoryState(state, {
+        now: options.now,
+        items: options.items,
+        scans,
+        observations: options.observations,
+        config: options.config,
+      }),
+  ).length
   const latestScan = getLatestScan(scans, options.now)
   const successfulScan = getLatestSuccessfulClosedScan(scans, options.now)
   const config = options.config ?? DEFAULT_CONFIG
@@ -96,8 +106,18 @@ export function getReadiness(
 
   if (
     new Set(activity.requiredItemIds).size !== activity.requiredItemIds.length ||
+    new Set(options.items.map((item) => item.id)).size !== options.items.length ||
+    activity.requiredItemIds.some((itemId) => !options.items.some((item) => item.id === itemId)) ||
     requiredStateGroups.some(
-      (states) => states.length !== 1 || !isValidInventoryState(states[0]!, options.now),
+      (states) =>
+        states.length !== 1 ||
+        !isValidInventoryState(states[0]!, {
+          now: options.now,
+          items: options.items,
+          scans,
+          observations: options.observations,
+          config,
+        }),
     )
   ) {
     return {

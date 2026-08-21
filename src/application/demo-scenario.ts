@@ -1,7 +1,7 @@
 import { simulateClosedBagScan, DEFAULT_PRESENT_ITEM_IDS, type ReadQuality, type SimulatedTagConfig } from '@/adapters/inventory/simulated-rfid'
 import { estimateTravel } from '@/adapters/travel/simulated-travel'
 import { evaluateAlerts, acknowledgeAlert, isAlertActionable, suppressAlert } from '@/domain/alerts'
-import { evaluateInventory } from '@/domain/inventory'
+import { evaluateInventory, hasEvidenceCorruption } from '@/domain/inventory'
 import { getReadiness } from '@/domain/readiness'
 import { calculateLeaveBy } from '@/domain/timing'
 import { createTraceEvent, redactTraceDetail } from '@/application/trace'
@@ -12,6 +12,7 @@ import { ACTIVITIES } from '@/fixtures/activities'
 import { ITEMS } from '@/fixtures/items'
 import { DEMO_SESSION_NOW } from '@/fixtures/demo-scenario'
 import { formatClock } from '@/lib/utils'
+import { parseFiniteTimestamp } from '@/domain/time'
 
 export interface InAppNotification {
   id: string
@@ -110,6 +111,8 @@ export function createDemoSession(now = DEMO_SESSION_NOW): DemoSession {
   })
   session.readiness = getReadiness(session.activity, session.inventory, session.scans, session.sensorStatus, {
     now: session.now,
+    items: session.items,
+    observations: session.observations,
   })
   return session
 }
@@ -143,7 +146,7 @@ function reconcileNotifications(session: DemoSession, newlyActionable: Alert[] =
   session.notifications = [...additions, ...retained].slice(0, 20)
 }
 
-function recompute(session: DemoSession, previousAlerts = session.alerts) {
+function recompute(session: DemoSession, previousAlerts = session.alerts, traceInventory = true) {
   session.inventory = evaluateInventory(session.items, session.scans, session.observations, {
     now: session.now,
     bagIsOpen: session.bagIsOpen,
@@ -151,11 +154,20 @@ function recompute(session: DemoSession, previousAlerts = session.alerts) {
   })
   session.readiness = getReadiness(session.activity, session.inventory, session.scans, session.sensorStatus, {
     now: session.now,
+    items: session.items,
+    observations: session.observations,
   })
-  pushTrace(session, 'inventory-state-recalculated', `Readiness is ${session.readiness.state}.`)
+  if (traceInventory) pushTrace(session, 'inventory-state-recalculated', `Readiness is ${session.readiness.state}.`)
+  if (
+    hasEvidenceCorruption(session.items, session.scans, session.observations, session.now) &&
+    !session.trace.some((event) => event.name === 'evidence-corruption-detected')
+  ) {
+    pushTrace(session, 'evidence-corruption-detected', 'Malformed historical evidence was quarantined from current-state derivation.')
+  }
   const leaveBy = session.travel?.leaveBy
   const result = evaluateAlerts(session.activity, session.items, session.inventory, session.scans, session.alerts, {
     now: session.now,
+    observations: session.observations,
     leaveBy,
   })
   session.alerts = result.alerts
@@ -340,6 +352,15 @@ export function acknowledge(session: DemoSession, alertId: string): DemoSession 
   )
   reconcileNotifications(next)
   if (transitioned) pushTrace(next, 'alert-acknowledged', `${next.alerts.find((alert) => alert.id === alertId)?.evidence.itemName ?? 'Alert'} acknowledged.`)
+  return next
+}
+
+export function advanceTime(session: DemoSession, now: string): DemoSession {
+  const currentMs = parseFiniteTimestamp(session.now)
+  const nextMs = parseFiniteTimestamp(now)
+  if (currentMs === undefined || nextMs === undefined || nextMs <= currentMs) return session
+  const next = { ...session, now }
+  recompute(next, session.alerts, false)
   return next
 }
 

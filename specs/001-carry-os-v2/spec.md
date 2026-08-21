@@ -77,23 +77,23 @@ A reviewer uses the full demo workspace to inspect activity context, leave-by ti
 **Acceptance Scenarios**:
 
 1. **Given** a visitor with no account, **When** they open the demo, **Then** they see current activity, start time, destination, leave-by, readiness, inventory memory, required and optional items, sensor controls, alert area, AI generator, trace, simulation disclosure, and reset.
-2. **Given** the demo, **When** the visitor resets, **Then** the fixed demonstration clock, Algorithms requirements, initial bag contents, connected reader, empty alerts, cleared transient UI state, and deterministic reset trace are restored.
+2. **Given** the demo, **When** the visitor resets, **Then** the demonstration clock returns to its canonical 9:21 AM starting point, Algorithms requirements, initial bag contents, connected reader, empty alerts, cleared transient UI state, and deterministic reset trace are restored.
 3. **Given** the demo, **When** the visitor inspects inventory, **Then** they can distinguish Confirmed, Probable, Not detected, Unknown, and Stale, and can tell inventory confidence apart from AI suggestion confidence.
 
 ---
 
 ### User Story 5 - Generate and approve an AI carry profile (Priority: P1)
 
-A reviewer submits event context and receives structured required, optional, excluded, and unregistered suggestions. Suggestions do not change readiness until the reviewer approves registered items. Rejected and unregistered suggestions never become requirements.
+A reviewer generates suggestions from the current fixed Algorithms event context and receives structured required, optional, excluded, and unregistered suggestions. Suggestions do not change readiness until the reviewer approves registered items. Rejected and unregistered suggestions never become requirements. The reachable workspace does not provide a free-form event editor.
 
 **Why this priority**: This is the only model responsibility and the trust boundary of the product.
 
-**Independent Test**: Submit exam context, confirm suggestions are visible but inactive, approve one item, reject another, and confirm only the approved registered item changes the checklist.
+**Independent Test**: Generate from the current Algorithms context, confirm suggestions are visible but inactive, approve one item, reject another, and confirm only the approved registered item changes the checklist.
 
 **Acceptance Scenarios**:
 
-1. **Given** registered items and exam context, **When** the visitor submits the form, **Then** they see required, optional, excluded, and unregistered suggestions with confidence and a brief reason, and readiness is unchanged.
-2. **Given** those suggestions, **When** the visitor approves calculator and rejects laptop, **Then** only the approved registered item updates the activity profile and the trace records request, source, validation, and approval decisions.
+1. **Given** the registered catalog and current Algorithms context, **When** the visitor selects Generate profile, **Then** they see required, optional, excluded, and unregistered suggestions with confidence and a brief reason, and readiness is unchanged.
+2. **Given** those suggestions, **When** the visitor approves a registered suggestion and rejects another, **Then** only the approved registered item updates the activity profile and the trace records request, source, validation, and approval decisions.
 3. **Given** unregistered suggestions, **When** they appear, **Then** they cannot be applied as readiness-affecting requirements.
 
 ---
@@ -104,11 +104,11 @@ If model credentials are missing, the provider fails, or output is malformed, th
 
 **Why this priority**: Preview and local use must not depend on secrets.
 
-**Independent Test**: Submit event context without credentials and confirm labeled fallback plus a still-usable demo.
+**Independent Test**: Generate the current activity profile without credentials and confirm labeled fallback plus a still-usable demo.
 
 **Acceptance Scenarios**:
 
-1. **Given** no model credentials, **When** the visitor submits event context, **Then** they receive deterministic fallback suggestions labeled as deterministic fallback, not as AI inference.
+1. **Given** no model credentials, **When** the visitor generates the current activity profile, **Then** they receive deterministic fallback suggestions labeled as deterministic fallback, not as AI inference.
 2. **Given** malformed or invalid model output, **When** validation fails after at most one repair retry, **Then** the visitor receives fallback or a clear non-technical error, and the trace records the failure without secrets or full prompts.
 3. **Given** a temporarily limited suggestion request, **When** the service rejects it, **Then** the visitor sees a safe retryable message with no infrastructure details.
 
@@ -154,7 +154,7 @@ Carry shows a mandatory in-app notification for a new unresolved missing-item co
 - A required item with no registered state cannot be ignored; readiness cannot become Ready.
 - Missing-to-uncertain and uncertain-to-missing update the existing unresolved warning rather than creating a second one.
 - Acknowledgement means the visitor has seen the warning; it remains unresolved and equivalent repeats do not notify again.
-- Suppression blocks additional notifications for that activity-item pair until the activity ends, is cancelled, or the requirement materially changes; history remains inspectable.
+- Suppression stores an absolute 30-minute deadline. It blocks notifications until valid reevaluation at that deadline, a material condition change, confirmation, requirement removal, cancellation, or activity termination; history remains inspectable.
 - An alert resolves when the item becomes Confirmed, the requirement is removed, or the activity is cancelled.
 - An alert expires when the activity start time passes or the activity is completed.
 - If timing data is unavailable, leave-by is not invented, timed proactive notification does not fire, and the interface explains that timing is unavailable.
@@ -177,16 +177,16 @@ Carry shows a mandatory in-app notification for a new unresolved missing-item co
 - **FR-005**: The public page MUST follow the reachable section order: hero, How Carry works, Day changes, inventory proof, and closing product moment.
 - **FR-006**: The full demo MUST expose activity context, timing, readiness, inventory memory, sensor controls, alerts, alert detail, AI generation, requirement approval, developer trace, simulation disclosure, and reset.
 - **FR-007**: The product MUST include the registered item catalog and three activity profiles, with Algorithms as the default demonstration.
-- **FR-008**: The demonstration clock MUST be fixed at 9:21 AM for a 10:00 AM Algorithms activity with 18 minutes travel and 7 minutes departure buffer, producing leave-by 9:35 AM, and MUST be labeled as a demonstration scenario.
+- **FR-008**: The demonstration clock MUST begin at 9:21 AM for a 10:00 AM Algorithms activity with 18 minutes travel and 7 minutes departure buffer, producing leave-by 9:35 AM. It MUST advance from an injected clock, reset to 9:21 AM, and remain labeled as a demonstration scenario.
 - **FR-009**: The initial demonstration bag MUST contain Laptop, Charger, and Umbrella, with Notebook absent.
 - **FR-010**: Visitors MUST be able to open the bag, close the bag and scan, add or remove items, set strong/weak/intermittent reads, mark outside-bag test input, arm a failed scan, disconnect or reconnect the reader, and reset the scenario.
 - **FR-011**: Inventory evaluation MUST produce Confirmed, Probable, Not detected, Unknown, and Stale according to the evidence rules in the approved product specification.
-- **FR-012**: Readiness MUST first return Not applicable for a canceled, completed, active, or already-started activity, then evaluate Sensor unavailable, Scan required, Missing, Uncertain, and Ready. Ready MUST require exactly one valid state for every required item and a recent valid closed-bag scan. Optional items MUST NEVER block Ready.
-- **FR-013**: Confirmed MUST require a successful recent closed-bag scan, no outside test hint, sufficient consecutive reads, sufficient signal when provided, and no bag opening after the scan.
+- **FR-012**: Readiness MUST first return Not applicable for a canceled, completed, active, or already-started activity, then evaluate Sensor unavailable, Scan required, Missing, Uncertain, and Ready. Ready MUST require exactly one valid state for every registered required item, derived from the latest recent successful closed-bag scan and that scan's valid supporting observations. Optional items MUST NEVER block Ready.
+- **FR-013**: Confirmed MUST reference the latest trustworthy successful closed-bag scan and its complete registered-item observation set, with no duplicate support, no outside test hint, sufficient consecutive reads, sufficient signal when provided, consistent confidence/reason/timestamps, and no bag opening after the scan.
 - **FR-014**: A failed scan MUST be recorded and MUST NOT create new inventory truth, a missing-item warning, or Ready.
 - **FR-015**: Leave-by MUST equal activity start minus travel duration minus departure buffer when timing is available, and MUST NOT be invented when timing is unavailable.
-- **FR-016**: Carry MUST support missing-item and uncertain-item warnings with explicit active, acknowledged, suppressed, resolved, and expired transitions. Suppressed warnings MUST reactivate after a valid snooze deadline; canceled activities and removed requirements MUST resolve warnings; started or completed activities MUST expire them.
-- **FR-017**: There MUST be at most one unresolved warning for the same activity and item. Missing/uncertain transitions MUST update that warning and refresh its evidence rather than create a second one.
+- **FR-016**: Carry MUST support missing-item and uncertain-item warnings with explicit active, acknowledged, suppressed, resolved, and expired transitions. Suppressed warnings MUST store an absolute 30-minute deadline and reevaluate when it is reached; canceled activities and removed requirements MUST resolve warnings; started or completed activities MUST expire them.
+- **FR-017**: There MUST be at most one unresolved warning for the same activity and item. Missing/uncertain transitions and each new valid scan MUST update that warning's scan-aware evidence rather than create a second one; evidence-only refresh MUST NOT duplicate user notification.
 - **FR-018**: Warning explanations MUST include activity, required item, latest scan time, inventory state, evidence level, leave-by time when available, and recommended next action.
 - **FR-019**: In-app notification is mandatory for a newly active warning inside the actionable window. Browser notification is optional and MUST request permission only after an explicit visitor action. Only active warnings are actionable and countable; acknowledged warnings remain visible, while suppressed, resolved, and expired warnings are hidden.
 - **FR-020**: Notifications MUST reconcile with warning status and evidence. Duplicate evaluations of an unchanged active condition MUST NOT emit duplicate notifications; reactivation after snooze or material evidence change MAY notify again.
@@ -195,8 +195,8 @@ Carry shows a mandatory in-app notification for a new unresolved missing-item co
 - **FR-023**: If the model is unavailable, times out, is rate-limited, or returns invalid output after at most one repair retry, the visitor MUST receive labeled deterministic fallback or a safe retryable error.
 - **FR-024**: Fallback MUST use event type, explicit registered-item name mentions, and simple approved rule profiles, and MUST be labeled as deterministic fallback rather than AI inference.
 - **FR-025**: Unregistered suggestions MUST NEVER affect readiness.
-- **FR-026**: The developer trace MUST record typed events for activity load, travel estimate, inference, validation, fallback, approval, rejection, bag/scan lifecycle, inventory recalculation, alert lifecycle, notification, and reader connectivity, without secrets, full prompts, chain-of-thought, or sensitive headers.
-- **FR-027**: Reset MUST restore the canonical demonstration: fixed clock, Algorithms, default requirements, initial bag, connected reader, no scans, no alerts, cleared transient UI state, and a deterministic reset trace.
+- **FR-026**: The developer trace MUST record typed events for activity load, travel estimate, inference, validation, fallback, approval, rejection, bag/scan lifecycle, inventory recalculation, evidence corruption, alert lifecycle, notification, and reader connectivity, without secrets, full prompts, chain-of-thought, or sensitive headers.
+- **FR-027**: Reset MUST restore the canonical demonstration: clock reset to the 9:21 AM starting point, Algorithms, default requirements, initial bag, connected reader, no scans, no alerts, cleared transient UI state, canceled obsolete inference work, and a deterministic reset trace.
 - **FR-028**: Requirement changes through explicit suggestion approval and demonstration-profile reset MUST be available in the demo.
 - **FR-029**: Inventory confidence and AI suggestion confidence MUST be visually and semantically separate.
 - **FR-030**: Simulated inventory MUST be disclosed beside product proof. The product MUST NOT claim physical RFID validation or solved inside-versus-outside hardware classification.
@@ -210,7 +210,7 @@ Carry shows a mandatory in-app notification for a new unresolved missing-item co
 - **Item**: A registered object the backpack can remember, with display name, category, tag identity, and intended tag placement.
 - **Activity**: An upcoming commitment with type, start time, destination, travel estimate, departure buffer, required items, optional items, and status.
 - **Tag observation**: A simulated closed-bag reading of a tag, including time, optional signal, consecutive reads, and optional inside/outside test hint.
-- **Inventory state**: Current belief for one item: confirmed, probable, not detected, unknown, or stale, with confidence, reason, and supporting observations.
+- **Inventory state**: Current belief for one item: confirmed, probable, not detected, unknown, or stale, with confidence, reason, explicit source-scan provenance, and supporting observations.
 - **Alert**: An evidence-backed missing or uncertain warning for one activity-item pair, with status, version, and inspectable evidence.
 - **Carry suggestion**: A model or fallback recommendation that an item is required, optional, or excluded, or an unregistered name that cannot affect readiness.
 - **Trace event**: An inspectable record of a product decision or action, excluding secrets and raw prompts.
@@ -222,7 +222,7 @@ Carry shows a mandatory in-app notification for a new unresolved missing-item co
 - **SC-001**: A first-time visitor can state what Carry does after no more than ten seconds on the public page.
 - **SC-002**: A reviewer can complete the missing-Notebook flow from a fresh load in under 60 seconds and see Ready only after Notebook is added and freshly scanned.
 - **SC-003**: After a valid missing-Notebook scan, exactly one unresolved Notebook warning exists; after a confirming rescan, that warning is resolved and no second unresolved Notebook warning exists.
-- **SC-004**: Submitting event context without model credentials still returns usable labeled fallback suggestions, and the rest of the demo remains operable.
+- **SC-004**: Generating suggestions for the current Algorithms context without model credentials still returns usable labeled fallback suggestions, and the rest of the demo remains operable.
 - **SC-005**: Approving or rejecting suggestions changes the activity checklist only for approved registered items; readiness does not change from unapproved model output.
 - **SC-006**: A failed scan, opened bag after evidence, or required item without current confirmed evidence never produces Ready.
 - **SC-007**: Keyboard-only visitors can complete demo, proof, alert inspection, and suggestion approval, and can dismiss dialogs with Escape.
@@ -232,7 +232,7 @@ Carry shows a mandatory in-app notification for a new unresolved missing-item co
 
 ## Assumptions
 
-- The existing CarryOS repository is a read-only behavioral reference and acceptance oracle; this specification is implemented in a new repository.
+- The superseded Vite implementation is a behavioral reference only; this specification describes the authoritative Next.js v2 application in this repository.
 - No login, accounts, database, or persistence layer is in scope. Client state is in-memory for the session and resets on refresh.
 - Model credentials may be absent. Deterministic fallback is a required success path, not a degraded novelty.
 - Browser notifications are browser-dependent residual risk; in-app notification remains the acceptance path.

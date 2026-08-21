@@ -10,7 +10,9 @@ export async function POST(request: Request) {
   }
   const trustProxy = process.env.VERCEL === '1' || process.env.TRUST_PROXY === 'true'
   const clientKey = clientKeyForRequest(request.headers, trustProxy)
-  const result = await handleCarryProfile(boundedBody.body, request.headers.get('content-type'), ITEMS, clientKey)
+  const result = await handleCarryProfile(boundedBody.body, request.headers.get('content-type'), ITEMS, clientKey, {
+    signal: request.signal,
+  })
   return Response.json(result.body, { status: result.status })
 }
 
