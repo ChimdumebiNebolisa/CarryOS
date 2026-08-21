@@ -10,7 +10,7 @@ export function BackpackVisual() {
           className="landing-backpack-image"
           width={1465}
           height={1024}
-          priority
+          loading="eager"
         />
       </div>
     </div>

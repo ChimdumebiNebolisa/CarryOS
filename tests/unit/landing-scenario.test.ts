@@ -11,7 +11,12 @@ describe('landing scenario', () => {
       ['Later', 'Gym after class'],
     ])
     expect(scenario.packedItems.map((item) => item.id)).toEqual(['laptop', 'charger', 'umbrella'])
+    expect(scenario.requiredItems.map((item) => item.id)).toEqual(['laptop', 'charger', 'notebook', 'umbrella'])
     expect(scenario.primaryMissingItem).toMatchObject({ id: 'notebook', state: 'missing', slot: 'notebook' })
     expect(scenario.primaryReason).toBe('You’ll need it for Algorithms at 10:00 AM.')
+    expect(scenario.decisionStates).toMatchObject([
+      { id: 'warning', confirmedCount: 3, requiredCount: 4, trackedItemState: 'not-detected' },
+      { id: 'ready', confirmedCount: 4, requiredCount: 4, trackedItemState: 'confirmed-present' },
+    ])
   })
 })

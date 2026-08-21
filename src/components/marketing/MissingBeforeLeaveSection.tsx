@@ -1,28 +1,33 @@
 import type { LandingScenario } from '@/application/landing-scenario'
 
 export function MissingBeforeLeaveSection({ scenario }: { scenario: LandingScenario }) {
-  const packedItems = scenario.packingItems.filter((item) => item.state === 'packed')
+  const [warning, ready] = scenario.decisionStates
 
   return (
-    <section id="inside-the-bag" className="landing-section landing-contents-section">
+    <section id="the-proof" className="landing-section landing-contents-section">
       <div className="landing-container">
         <div className="landing-contents-intro">
-          <h2>Carry knows what’s already with you.</h2>
-          <p>Before you leave, Carry checks what’s packed and what is still missing.</p>
+          <p className="landing-section-kicker">Warning → fix → Ready</p>
+          <h2>The answer changes when the evidence does.</h2>
+          <p>Carry doesn’t assume the problem is fixed. It waits for a new closed-bag scan, then updates the decision.</p>
         </div>
-        <div className="landing-grid landing-contents-layout">
-          <div className="landing-inventory-composition" aria-label="Laptop, Charger, and Umbrella packed.">
-            {packedItems.map((item) => (
-              <div key={item.id} className={`landing-inventory-item landing-inventory-item--${item.slot}`}>
-                <strong>{item.name}</strong>
-                <span>PACKED</span>
-              </div>
-            ))}
+        <div className="landing-recovery-sequence">
+          <div className="landing-recovery-state landing-recovery-state--warning">
+            <span>Before leaving</span>
+            <p><strong>{warning.confirmedCount}</strong>/{warning.requiredCount}</p>
+            <h3>{warning.label}</h3>
+            <small>{scenario.primaryReason}</small>
           </div>
-          <div className="landing-contents-result">
-            <h3>{scenario.primaryMissingItem.name} missing.</h3>
-            <p>{scenario.primaryReason}</p>
-            <span>From your calendar</span>
+          <ol className="landing-recovery-actions">
+            <li><span>01</span><strong>Add Notebook</strong></li>
+            <li><span>02</span><strong>Close bag</strong></li>
+            <li><span>03</span><strong>Run a new scan</strong></li>
+          </ol>
+          <div className="landing-recovery-state landing-recovery-state--ready">
+            <span>After rescan</span>
+            <p><strong>{ready.confirmedCount}</strong>/{ready.requiredCount}</p>
+            <h3>{ready.label}</h3>
+            <small>Confirmed from the latest closed-bag scan.</small>
           </div>
         </div>
       </div>

@@ -2,12 +2,13 @@ import type { LandingScenario } from '@/application/landing-scenario'
 
 export function DayChangesSection({ scenario }: { scenario: LandingScenario }) {
   return (
-    <section className="landing-section landing-day-changes">
+    <section id="your-day" className="landing-section landing-day-changes">
       <div className="landing-container">
         <div className="landing-grid landing-day-layout">
           <div className="landing-day-intro">
+            <p className="landing-section-kicker">Context changes the requirement</p>
             <h2>Your bag changes because your day changes.</h2>
-            <p>Class, weather, plans, and where you’re headed can all change what you need to bring.</p>
+            <p>Class, weather, and plans each contribute a different reason to carry something.</p>
           </div>
           <ol className="landing-day-agenda">
             {scenario.events.map((event) => (

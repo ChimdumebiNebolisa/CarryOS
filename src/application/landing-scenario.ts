@@ -1,4 +1,5 @@
 import { buildLandingProof, type LandingReconciliationRow } from '@/application/landing-proof'
+import { buildHeroSnapshots } from '@/application/hero-states'
 import { formatClock } from '@/lib/utils'
 
 export type LandingItemId = 'laptop' | 'charger' | 'umbrella' | 'notebook'
@@ -26,11 +27,21 @@ export interface LandingEvent {
 
 export interface LandingScenario {
   events: readonly [LandingEvent, LandingEvent, LandingEvent]
-  requiredItems: readonly [LandingSceneItem, LandingSceneItem, LandingSceneItem]
+  requiredItems: readonly [LandingSceneItem, LandingSceneItem, LandingSceneItem, LandingSceneItem]
   packingItems: readonly [LandingSceneItem, LandingSceneItem, LandingSceneItem, LandingSceneItem]
   packedItems: readonly [LandingSceneItem, LandingSceneItem, LandingSceneItem]
   primaryMissingItem: LandingSceneItem
   primaryReason: string
+  decisionStates: readonly [LandingDecisionState, LandingDecisionState]
+}
+
+export interface LandingDecisionState {
+  id: 'warning' | 'ready'
+  label: string
+  detail: string
+  confirmedCount: number
+  requiredCount: number
+  trackedItemState: 'not-detected' | 'confirmed-present'
 }
 
 const staticNeeds = {
@@ -61,6 +72,7 @@ function toSceneItem(rows: readonly LandingReconciliationRow[], itemId: LandingI
 /** Adapts the deterministic demo proof into the landing's single consumer story. */
 export function buildLandingScenario(): LandingScenario {
   const proof = buildLandingProof()
+  const snapshots = buildHeroSnapshots()
   const laptop = toSceneItem(proof.rows, 'laptop', 'packed')
   const charger = toSceneItem(proof.rows, 'charger', 'packed')
   const umbrella = toSceneItem(proof.rows, 'umbrella', 'packed')
@@ -72,10 +84,28 @@ export function buildLandingScenario(): LandingScenario {
       { id: 'rain', time: '5:00 PM', name: 'Rain expected', needs: [staticNeeds.umbrella] },
       { id: 'gym', time: 'Later', name: 'Gym after class', needs: [staticNeeds.waterBottle, staticNeeds.shoes] },
     ],
-    requiredItems: [laptop, charger, notebook],
+    requiredItems: [laptop, charger, notebook, umbrella],
     packingItems: [laptop, charger, umbrella, notebook],
     packedItems: [laptop, charger, umbrella],
     primaryMissingItem: notebook,
     primaryReason: `You’ll need it for ${proof.activity.name} at ${formatClock(proof.activity.startTime)}.`,
+    decisionStates: [
+      {
+        id: 'warning',
+        label: snapshots.missing.title,
+        detail: snapshots.missing.detail,
+        confirmedCount: snapshots.missing.confirmed,
+        requiredCount: snapshots.missing.required,
+        trackedItemState: 'not-detected',
+      },
+      {
+        id: 'ready',
+        label: snapshots.ready.title,
+        detail: snapshots.ready.detail,
+        confirmedCount: snapshots.ready.confirmed,
+        requiredCount: snapshots.ready.required,
+        trackedItemState: 'confirmed-present',
+      },
+    ],
   }
 }
