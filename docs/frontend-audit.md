@@ -22,4 +22,4 @@ The pre-refactor audit is superseded by the CarryOS v2 landing implementation.
 
 ## Legacy fixture
 
-`CarryStateStack.tsx` remains a legacy test fixture for the old hero-state unit contract. It is not a supported marketing primitive and has no landing CSS ownership.
+The public site is now `/` plus `/how-it-works`. Historical landing-section notes below describe the retired multi-section page.

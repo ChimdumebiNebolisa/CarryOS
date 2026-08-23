@@ -1,37 +1,21 @@
 import { expect, test } from '@playwright/test'
 
-test('landing explains the product and keeps the demo separate', async ({ page }) => {
+test('homepage explains the product without promoting the demo', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'Know before you go.' })).toBeVisible()
-  await expect(page.getByText('CarryOS knows what you’ll need today, checks what’s already with you, and warns you before you leave something important behind.')).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Your bag changes because your day changes.' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Carry knows what’s already with you.' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Notebook missing.' })).toHaveCount(1)
-  await expect(page.locator('.landing-inventory-item')).toHaveCount(3)
-  await expect(page.locator('.landing-inventory-composition')).not.toContainText('MISSING')
-  await expect(page.getByRole('heading', { name: 'Coming next.' })).toHaveCount(0)
-  await expect(page.getByText('You’ll need it for Algorithms at 10:00 AM.')).toBeVisible()
-  await expect(page.locator('.landing-hero .landing-callout')).toHaveCount(0)
-  await expect(page.locator('.landing-hero .landing-backpack-statuses')).toHaveCount(0)
+  await expect(page.getByText('CarryOS determines what you need for the day, checks what is already with you, and warns you before you leave something important behind.')).toBeVisible()
   await expect(page.locator('a[href="/demo"]')).toHaveCount(0)
-  await expect(page.getByRole('link', { name: 'View on GitHub' }).first()).toHaveAttribute('href', /github\.com/)
-  const landingText = await page.locator('body').innerText()
-  for (const phrase of ['↗', 'View the source', 'reconciliation engine', 'confidence meter', 'system architecture', 'contextual signals']) {
-    expect(landingText).not.toContain(phrase)
-  }
+  await expect(page.getByRole('link', { name: 'Source code' })).toHaveAttribute('href', /github\.com/)
+  await expect(page.getByRole('link', { name: 'How it works' })).toHaveAttribute('href', '/how-it-works')
 })
 
-test('landing navigation scrolls to the bag section and stays visible', async ({ page }) => {
+test('homepage how-it-works CTA opens the architecture page', async ({ page }) => {
   await page.goto('/')
-  await page.getByRole('link', { name: 'See how it works' }).click()
-  await expect(page).toHaveURL(/#how-it-works$/)
-  await expect(page.getByRole('heading', { name: 'How Carry works' })).toBeInViewport()
-  await expect(page.getByRole('link', { name: 'Inside the bag' })).toBeVisible()
-  await page.getByRole('link', { name: 'Inside the bag' }).click()
-  await expect(page).toHaveURL(/#inside-the-bag$/)
-  await expect(page.getByRole('heading', { name: 'Carry knows what’s already with you.' })).toBeInViewport()
-  const navTop = await page.locator('.landing-nav').evaluate((node) => Math.round(node.getBoundingClientRect().top))
-  expect(navTop).toBe(0)
+  await page.getByRole('link', { name: 'How it works' }).click()
+  await expect(page).toHaveURL(/\/how-it-works$/)
+  await expect(page.getByRole('heading', { name: 'How context becomes an intervention.' })).toBeVisible()
+  await expect(page.locator('.arch-canvas .react-flow')).toBeVisible()
+  await expect(page.getByText('RFID observation is simulated.')).toBeVisible()
 })
 
 test('missing notebook flow', async ({ page }) => {

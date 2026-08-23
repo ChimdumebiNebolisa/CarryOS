@@ -11,7 +11,14 @@ npm ci
 npm run dev
 ```
 
-Open the URL Next.js prints. `/` is the public landing page. `/demo` is the full technical workspace. No login is required.
+Open the URL Next.js prints.
+
+- `/` is a single-screen editorial poster. It does not scroll. The two actions are **How it works** and **Source code**.
+- `/how-it-works` is the interactive architecture viewer: a React Flow system graph with per-subsystem explanations.
+- The GitHub source link uses `NEXT_PUBLIC_GITHUB_REPOSITORY_URL`.
+- `/demo` still exists as a secondary technical workspace. It is not linked from the homepage.
+
+No login is required.
 
 ## What is real
 
@@ -60,4 +67,4 @@ npm run test:e2e
 
 ## Architecture
 
-See [docs/architecture.md](docs/architecture.md). Hardware future work is in [docs/hardware-plan.md](docs/hardware-plan.md). The 60-second script is in [docs/demo-script.md](docs/demo-script.md).
+See [docs/architecture.md](docs/architecture.md). Hardware future work is in [docs/hardware-plan.md](docs/hardware-plan.md). The 60-second script is in [docs/demo-script.md](docs/demo-script.md). Hero photo licensing is in [docs/image-credits.md](docs/image-credits.md).

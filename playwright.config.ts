@@ -1,21 +1,25 @@
 import { defineConfig, devices } from '@playwright/test'
 
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000'
+
 export default defineConfig({
   testDir: 'tests/e2e',
   fullyParallel: false,
   retries: 0,
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL,
     trace: 'on-first-retry',
   },
-  webServer: {
-    command: process.env.CI
-      ? 'npm run start -- --hostname localhost --port 3000'
-      : 'npm run dev -- --hostname localhost --port 3000',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: process.env.PLAYWRIGHT_BASE_URL
+    ? undefined
+    : {
+        command: process.env.CI
+          ? 'npm run start -- --hostname localhost --port 3000'
+          : 'npm run dev -- --hostname localhost --port 3000',
+        url: 'http://localhost:3000',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] }, testIgnore: /browser-smoke\.spec\.ts/ },
     { name: 'chromium-smoke', use: { ...devices['Desktop Chrome'] }, testMatch: /browser-smoke\.spec\.ts/ },

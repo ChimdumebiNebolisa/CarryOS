@@ -65,27 +65,20 @@ test('shared Button semantic states remain visible in the browser', async ({ pag
   await expectValidControlStates(page, page.getByTestId('add-notebook'), { allowsTransparentBase: true })
 })
 
-test('landing navigation, anchor, and keyboard focus stay usable', async ({ page }) => {
+test('homepage CTAs and keyboard focus stay usable', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('link', { name: 'How it works', exact: true }).click()
-  await expect(page).toHaveURL(/#how-it-works$/)
-  const geometry = await page.evaluate(() => {
-    const nav = document.querySelector('.landing-nav')!.getBoundingClientRect()
-    const heading = document.querySelector('#how-it-works h2')!.getBoundingClientRect()
-    return { navTop: Math.round(nav.top), navBottom: Math.round(nav.bottom), headingTop: Math.round(heading.top) }
-  })
-  expect(geometry.navTop).toBe(0)
-  expect(geometry.headingTop).toBeGreaterThanOrEqual(geometry.navBottom)
+  await expect(page).toHaveURL(/\/how-it-works$/)
 
   await page.goto('/')
-  for (let index = 0; index < 5; index += 1) await page.keyboard.press('Tab')
-  const focusedHeroCta = page.locator('.landing-hero .inline-flex')
-  await expect(focusedHeroCta).toBeFocused()
-  const focusStyle = await styles(focusedHeroCta)
+  const howItWorks = page.getByRole('link', { name: 'How it works', exact: true })
+  await howItWorks.focus()
+  await expect(howItWorks).toBeFocused()
+  const focusStyle = await styles(howItWorks)
   expect(focusStyle.outlineStyle).not.toBe('none')
   expect(Number.parseFloat(focusStyle.outlineWidth)).toBeGreaterThan(0)
 
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  const reducedDuration = await focusedHeroCta.evaluate((element) => Number.parseFloat(getComputedStyle(element).transitionDuration))
+  const reducedDuration = await howItWorks.evaluate((element) => Number.parseFloat(getComputedStyle(element).transitionDuration))
   expect(reducedDuration).toBeLessThanOrEqual(0.00002)
 })

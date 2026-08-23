@@ -1,6 +1,4 @@
-import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { CarryStateStack } from '@/components/marketing/CarryStateStack'
 import { buildHeroSnapshots } from '@/application/hero-states'
 
 describe('hero states', () => {
@@ -11,11 +9,7 @@ describe('hero states', () => {
     expect(snapshots.ready.readiness.state).toBe('ready')
     expect(snapshots.missing.confirmed).toBe(3)
     expect(snapshots.ready.confirmed).toBe(4)
-  })
-
-  it('render authentic state copy', () => {
-    render(<CarryStateStack />)
-    expect(screen.getByText('Inventory belief')).toBeTruthy()
-    expect(screen.getByText('1 item missing')).toBeTruthy()
+    expect(snapshots.missing.title).toMatch(/not detected/i)
+    expect(snapshots.ready.title).toMatch(/Ready/)
   })
 })
