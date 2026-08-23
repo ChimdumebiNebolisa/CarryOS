@@ -81,7 +81,6 @@ src/
     demo/
     ui/
   domain/
-    activity.ts
     inventory.ts
     readiness.ts
     alerts.ts
@@ -95,9 +94,7 @@ src/
   adapters/
     inventory/simulated-rfid.ts
     travel/simulated-travel.ts
-    ai/model-provider.ts
     ai/openai-provider.ts
-    ai/fallback-provider.ts
     rate-limit/rate-limiter.ts
   fixtures/
     activities.ts

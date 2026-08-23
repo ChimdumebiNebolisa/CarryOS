@@ -50,5 +50,3 @@ export const ACTIVITIES: Activity[] = [
     status: 'upcoming',
   },
 ]
-
-export const DEFAULT_ACTIVITY = ACTIVITIES[0]

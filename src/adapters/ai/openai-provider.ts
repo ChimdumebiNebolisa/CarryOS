@@ -1,4 +1,3 @@
-import type { ModelProvider } from '@/adapters/ai/model-provider'
 import { INPUT_LIMITS } from '@/domain/carry-profile'
 import type { CarryProfileRequest, Item } from '@/domain/types'
 
@@ -9,9 +8,7 @@ Use only registered item IDs in requiredItems, optionalItems, and excludedItems.
 Put unknown object names in unregisteredSuggestions.
 Return JSON only. Do not invent IDs.`
 
-export class OpenAIProvider implements ModelProvider {
-  readonly name = 'openai' as const
-
+export class OpenAIProvider {
   constructor(
     private readonly apiKey = process.env.OPENAI_API_KEY,
     private readonly model = process.env.OPENAI_MODEL,

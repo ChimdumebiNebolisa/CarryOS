@@ -3,7 +3,6 @@ import { estimateTravel } from '@/adapters/travel/simulated-travel'
 import { evaluateAlerts, acknowledgeAlert, isAlertActionable, suppressAlert } from '@/domain/alerts'
 import { evaluateInventory, hasEvidenceCorruption } from '@/domain/inventory'
 import { getReadiness } from '@/domain/readiness'
-import { calculateLeaveBy } from '@/domain/timing'
 import { createTraceEvent, redactTraceDetail } from '@/application/trace'
 import { shouldNotify } from '@/application/notification-policy'
 import { scanId } from '@/lib/ids'
@@ -29,7 +28,6 @@ export interface DemoSession {
   lastBagOpenedAt?: string
   sensorStatus: SensorStatus
   failNextScan: boolean
-  travelUnavailable: boolean
   tags: Record<string, SimulatedTagConfig>
   scans: Scan[]
   observations: TagObservation[]
@@ -76,7 +74,6 @@ export function createDemoSession(now = DEMO_SESSION_NOW): DemoSession {
     bagIsOpen: true,
     sensorStatus: 'connected',
     failNextScan: false,
-    travelUnavailable: false,
     tags: defaultTags(),
     scans: [],
     observations: [],
@@ -375,8 +372,4 @@ export function suppress(session: DemoSession, alertId: string): DemoSession {
   reconcileNotifications(next)
   if (transitioned) pushTrace(next, 'alert-suppressed', `${next.alerts.find((alert) => alert.id === alertId)?.evidence.itemName ?? 'Alert'} snoozed.`)
   return next
-}
-
-export function expectedLeaveBy(): string {
-  return calculateLeaveBy(ACTIVITIES[0].startTime, 18, 7)
 }

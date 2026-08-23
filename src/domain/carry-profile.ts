@@ -3,12 +3,9 @@ import type {
   CarryProfileRequest,
   CarryProfileResult,
   CarrySuggestion,
-  EventType,
   Item,
   UnregisteredSuggestion,
 } from '@/domain/types'
-
-export const EVENT_TYPES: EventType[] = ['class', 'exam-lab', 'internship', 'other']
 
 export const INPUT_LIMITS = {
   eventName: 120,
@@ -192,8 +189,4 @@ export function normalizeCarryProfile(
     excludedItems: excluded,
     unregisteredSuggestions: unregistered.slice(0, INPUT_LIMITS.suggestionCap),
   }
-}
-
-export function registeredItemsFromCatalog(items: Item[]): CarryProfileRequest['registeredItems'] {
-  return items.map((item) => ({ itemId: item.id, name: item.name, category: item.category }))
 }

@@ -9,11 +9,3 @@ export function calculateLeaveBy(
   }
   return new Date(start - (travelMinutes + departureBufferMinutes) * 60_000).toISOString()
 }
-
-export function minutesBetween(from: string, to: string): number {
-  return Math.round((Date.parse(to) - Date.parse(from)) / 60_000)
-}
-
-export function isIsoBefore(left: string, right: string): boolean {
-  return Date.parse(left) < Date.parse(right)
-}

@@ -1,6 +1,5 @@
 import { DEMO_NOW } from '@/domain/types'
 
-export const DEMO_WEATHER_NOTE = 'Rain expected after 5:00 PM'
 export const DEMO_SESSION_NOW = DEMO_NOW
 
 export const DEMO_REQUIRED_ITEM_IDS = ['laptop', 'charger', 'notebook', 'umbrella'] as const

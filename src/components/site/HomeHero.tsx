@@ -44,10 +44,7 @@ export function HomeHero() {
         </div>
 
         <footer className="home-strip">
-          <p className="mono">Canonical scenario — Algorithms · 10:00 AM · leave by 9:35 AM</p>
-          <p className="mono home-credit">
-            Photo: Bayram Yalçın / Pexels
-          </p>
+          <p className="mono home-credit">Photo: Bayram Yalçın / Pexels</p>
         </footer>
       </div>
 

@@ -1,5 +1,4 @@
 export const DEMO_NOW = '2026-08-05T09:21:00-05:00'
-export const TIME_ZONE = 'America/Chicago'
 
 export type ActivityType = 'class' | 'exam-lab' | 'internship'
 export type EventType = ActivityType | 'other'

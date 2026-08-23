@@ -15,7 +15,7 @@ test('homepage how-it-works CTA opens the architecture page', async ({ page }) =
   await expect(page).toHaveURL(/\/how-it-works$/)
   await expect(page.getByRole('heading', { name: 'How context becomes an intervention.' })).toBeVisible()
   await expect(page.locator('.arch-canvas .react-flow')).toBeVisible()
-  await expect(page.getByText('RFID observation is simulated.')).toBeVisible()
+  await expect(page.getByText('RFID observation is simulated')).toBeVisible()
 })
 
 test('missing notebook flow', async ({ page }) => {

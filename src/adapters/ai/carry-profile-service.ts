@@ -1,8 +1,8 @@
-import { fallbackProfile } from '@/adapters/ai/fallback-provider'
 import { OpenAIProvider } from '@/adapters/ai/openai-provider'
 import { consumeRateLimit, createRateLimitStore, type RateLimitStore } from '@/adapters/rate-limit/rate-limiter'
 import {
   carryProfileRequestSchema,
+  createFallbackCarryProfile,
   INPUT_LIMITS,
   normalizeCarryProfile,
 } from '@/domain/carry-profile'
@@ -65,7 +65,7 @@ export async function handleCarryProfile(
   }
 
   if (!provider.configured()) {
-    return { status: 200, body: fallbackProfile(parsed.data, items) }
+    return { status: 200, body: createFallbackCarryProfile(parsed.data, items) }
   }
 
   try {
@@ -79,11 +79,11 @@ export async function handleCarryProfile(
     const retry = await provider.infer(parsed.data, items, options.signal)
     const repaired = normalizeCarryProfile(retry, items, 'model')
     if (repaired) return { status: 200, body: repaired }
-    return { status: 200, body: fallbackProfile(parsed.data, items) }
+    return { status: 200, body: createFallbackCarryProfile(parsed.data, items) }
   } catch {
     if (options.signal?.aborted) {
       return { status: 499, body: { error: 'Request canceled.', code: 'request-canceled' } }
     }
-    return { status: 200, body: fallbackProfile(parsed.data, items) }
+    return { status: 200, body: createFallbackCarryProfile(parsed.data, items) }
   }
 }
