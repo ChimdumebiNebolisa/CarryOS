@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo, useRef, useSyncExternalStore } from 'react'
+import { useCallback, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import {
   Background,
   Handle,
@@ -8,11 +8,12 @@ import {
   Position,
   ReactFlow,
   ReactFlowProvider,
-  getNodesBounds,
+  applyNodeChanges,
   useReactFlow,
   useStore,
   type Edge,
   type Node,
+  type NodeChange,
   type NodeProps,
 } from '@xyflow/react'
 import {
@@ -72,9 +73,9 @@ const nodeTypes = { subsystem: KindNode, archgroup: GroupNode }
 const groupDefs: ReadonlyArray<{ id: string; x: number; y: number; w: number; h: number; label: string }> = [
   { id: 'context', x: 0, y: 0, w: 280, h: 212, label: 'Context' },
   { id: 'requirements', x: 320, y: 0, w: 840, h: 212, label: 'Requirements' },
-  { id: 'decision', x: 660, y: 240, w: 800, h: 212, label: 'Decision' },
-  { id: 'observation', x: 0, y: 612, w: 840, h: 212, label: 'Observation' },
-  { id: 'state', x: 880, y: 612, w: 560, h: 212, label: 'State' },
+  { id: 'decision', x: 660, y: 264, w: 800, h: 212, label: 'Decision' },
+  { id: 'observation', x: 0, y: 672, w: 840, h: 212, label: 'Observation' },
+  { id: 'state', x: 880, y: 672, w: 560, h: 212, label: 'State' },
 ]
 
 const childPlacement: ReadonlyArray<[id: string, groupId: string, x: number, y: number]> = [
@@ -167,15 +168,17 @@ function buildEdges(selectedId: string | null): Edge[] {
   })
 }
 
-function buildNodes(selectedId: string | null): Node[] {
-  if (!selectedId) return baseNodes.map((node) => (node.type === 'subsystem' ? { ...node, className: undefined } : node))
+function buildNodes(nodes: Node[], selectedId: string | null): Node[] {
   const { incoming, outgoing } = relatedSets(selectedId)
-  return baseNodes.map((node) => {
+  return nodes.map((node) => {
     if (node.type !== 'subsystem') return node
-    let className = 'arch-node-dim'
-    if (node.id === selectedId) className = 'arch-node-emphasis'
-    else if (incoming.has(node.id)) className = 'arch-node-input'
-    else if (outgoing.has(node.id)) className = 'arch-node-output'
+    let className: string | undefined
+    if (selectedId) {
+      if (node.id === selectedId) className = 'arch-node-emphasis'
+      else if (incoming.has(node.id)) className = 'arch-node-input'
+      else if (outgoing.has(node.id)) className = 'arch-node-output'
+      else className = 'arch-node-dim'
+    }
     return { ...node, className }
   })
 }
@@ -190,15 +193,15 @@ export interface ArchitectureExplorerProps {
 }
 
 function Toolbar({ selectedId, onSelect }: ArchitectureExplorerProps) {
-  const { getNodes, fitView, fitBounds } = useReactFlow()
+  const { getNodes, fitView } = useReactFlow()
 
   const focusGroup = useCallback(
     (groupId: string) => {
       const members = getNodes().filter((node) => node.parentId === `group-${groupId}`)
       if (members.length === 0) return
-      fitBounds(getNodesBounds(members), { padding: 0.3, duration: 420 })
+      fitView({ nodes: members.map(({ id }) => ({ id })), padding: 0.3, duration: 420 })
     },
-    [getNodes, fitBounds],
+    [getNodes, fitView],
   )
 
   return (
@@ -255,8 +258,12 @@ function ZoomControls() {
 function ExplorerCanvas({ selectedId, onSelect }: ArchitectureExplorerProps) {
   const isClient = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot)
   const edges = useMemo(() => buildEdges(selectedId), [selectedId])
-  const nodes = useMemo(() => buildNodes(selectedId), [selectedId])
+  const [nodes, setNodes] = useState<Node[]>(baseNodes)
   const userHasSelected = useRef(false)
+
+  const handleNodesChange = useCallback((changes: NodeChange[]) => {
+    setNodes((current) => applyNodeChanges(changes, current))
+  }, [])
 
   const handleSelectionChange = useCallback(
     ({ nodes: nextNodes }: { nodes: Node[] }) => {
@@ -278,13 +285,13 @@ function ExplorerCanvas({ selectedId, onSelect }: ArchitectureExplorerProps) {
   return (
     <div className="arch-canvas">
       <ReactFlow
-        nodes={nodes}
+        nodes={buildNodes(nodes, selectedId)}
         edges={edges}
         nodeTypes={nodeTypes}
         colorMode="dark"
         fitView
         fitViewOptions={{ padding: 0.04 }}
-        minZoom={0.3}
+        minZoom={0.22}
         maxZoom={1.6}
         nodesDraggable={false}
         nodesConnectable={false}
@@ -293,6 +300,7 @@ function ExplorerCanvas({ selectedId, onSelect }: ArchitectureExplorerProps) {
         edgesFocusable={false}
         panOnScroll
         selectionOnDrag={false}
+        onNodesChange={handleNodesChange}
         onSelectionChange={handleSelectionChange}
         proOptions={{ hideAttribution: false }}
       >

@@ -460,6 +460,8 @@ a {
   gap: 0.2rem;
   padding: 0;
   overflow-x: auto;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .arch-nav button {
@@ -495,6 +497,8 @@ a {
   margin: 0;
   padding: 0;
   list-style: none;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .arch-legend li {

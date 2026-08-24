@@ -18,6 +18,27 @@ test('homepage how-it-works CTA opens the architecture page', async ({ page }) =
   await expect(page.getByText('RFID observation is simulated')).toBeVisible()
 })
 
+test('architecture explorer focuses regions and selects nodes', async ({ page }) => {
+  await page.goto('/how-it-works')
+  await expect(page.locator('.arch-panel h2')).toHaveText('Readiness Engine')
+
+  await page.getByRole('button', { name: 'Observation' }).click()
+  await page.waitForTimeout(600)
+  const canvas = (await page.locator('.arch-canvas').boundingBox())!
+  const node = (await page.locator('.react-flow__node').filter({ hasText: 'Registered Items' }).boundingBox())!
+  expect(node.x).toBeGreaterThanOrEqual(canvas.x)
+  expect(node.y).toBeGreaterThanOrEqual(canvas.y)
+  expect(node.x + node.width).toBeLessThanOrEqual(canvas.x + canvas.width + 1)
+  expect(node.y + node.height).toBeLessThanOrEqual(canvas.y + canvas.height + 1)
+
+  await page.getByTestId('rf__node-belief').click()
+  await expect(page.locator('.arch-panel h2')).toHaveText('Inventory Belief')
+  await expect(page.locator('.arch-panel')).toContainText('src/domain/inventory.ts')
+
+  await page.getByRole('button', { name: 'Overview' }).click()
+  await expect(page.locator('.arch-panel-hint')).toBeVisible()
+})
+
 test('missing notebook flow', async ({ page }) => {
   await page.goto('/demo')
   await expect(page.getByTestId('readiness')).toHaveText('Scan required')
